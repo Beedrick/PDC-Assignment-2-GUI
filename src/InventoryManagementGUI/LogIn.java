@@ -10,4 +10,7 @@ package InventoryManagementGUI;
  */
 public class LogIn {
     
+    private int number;
+    
+    
 }
