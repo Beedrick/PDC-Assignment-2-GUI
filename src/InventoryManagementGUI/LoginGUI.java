@@ -17,65 +17,93 @@ import javax.swing.JTextField;
  *
  * @author Gorilla Rig
  */
-public class LoginGUI implements ActionListener {
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 
-    private static final JFrame frame = new JFrame();
-    private static final JPanel panel = new JPanel();
-    private static final JTextField userText = new JTextField(20);
-    private static final JLabel passLabel = new JLabel("Password");
-    private static final JPasswordField passText = new JPasswordField();
-    private static final JButton loginButton = new JButton("Login");
-    private static final JLabel success = new JLabel("");
+public class LoginGUI extends JFrame {
+    private JTextField usernameField;
+    private JPasswordField passwordField;
+    private JButton loginButton;
+    private LoginController controller;
 
-    public static void main(String[] args) {
+    public LoginGUI(LoginController controller) {
+        this.controller = controller;
 
-        frame.setSize(350, 200);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.add(panel);
+        setTitle("Login");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(800, 600);
+        setResizable(false);
+        setLocationRelativeTo(null);
 
-        panel.setLayout(null);
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        mainPanel.setBackground(new Color(220, 220, 220));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(50, 50, 50, 50));
 
-        JLabel label = new JLabel("User");
-        label.setBounds(10, 20, 80, 25);
-        panel.add(label);
+        JLabel titleLabel = new JLabel("Login");
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 30));
+        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        userText.setBounds(100, 20, 165, 25);
-        panel.add(userText);
+        JPanel inputPanel = new JPanel();
+        inputPanel.setLayout(new GridBagLayout());
+        inputPanel.setBackground(new Color(255, 255, 255));
+        inputPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        passLabel.setBounds(10, 50, 80, 25);
-        panel.add(passLabel);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(10, 10, 10, 10);
 
-        passText.setBounds(100, 50, 165, 25);
-        panel.add(passText);
+        JLabel usernameLabel = new JLabel("Username:");
+        usernameField = new JTextField();
+        usernameField.setPreferredSize(new Dimension(200, 30));
 
-        loginButton.setBounds(10, 80, 70, 25);
-        loginButton.addActionListener(new LoginGUI());
+        JLabel passwordLabel = new JLabel("Password:");
+        passwordField = new JPasswordField();
+        passwordField.setPreferredSize(new Dimension(200, 30));
 
-        panel.add(loginButton);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        inputPanel.add(usernameLabel, gbc);
 
-        success.setBounds(10, 110, 300, 25);
-        panel.add(success);
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        inputPanel.add(usernameField, gbc);
 
-        frame.setVisible(true);
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        inputPanel.add(passwordLabel, gbc);
+
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        inputPanel.add(passwordField, gbc);
+
+        loginButton = new JButton("Login");
+        loginButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        loginButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String username = usernameField.getText();
+                char[] passwordChars = passwordField.getPassword();
+                String password = new String(passwordChars);
+
+                // Notify the controller about the login attempt
+                controller.login(username, password);
+            }
+        });
+
+        mainPanel.add(titleLabel);
+        mainPanel.add(Box.createVerticalStrut(50));
+        mainPanel.add(inputPanel);
+        mainPanel.add(Box.createVerticalStrut(20));
+        mainPanel.add(loginButton);
+
+        getContentPane().setBackground(new Color(240, 240, 240));
+        getContentPane().add(mainPanel);
+        setVisible(true);
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        String user = userText.getText();
-        String pass = passText.getText();
-
-        LogIn logIn = new LogIn();
-
-        boolean isUser = user.equals("godHuch");
-        boolean isPass = pass.equals("password123");
-
-        if (isUser && isPass) {
-            success.setText("Login Successful");
-            frame.dispose();
-
-        } else {
-            success.setText("Incorrect Username or Password");
-        }
+    public void displayErrorMessage(String message) {
+        JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
 }
