@@ -10,4 +10,9 @@ package InventoryManagementGUI;
  */
 public class CarSideMirror {
     
+    public static void main(String[] args) {
+        System.out.println("AYE");
+    }
+    
+    
 }
