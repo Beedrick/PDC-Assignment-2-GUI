@@ -9,5 +9,7 @@ package InventoryManagementGUI;
  * @author Gorilla Rig
  */
 public class CarProduct {
-    
+        public static void main(String[] args) {
+            System.out.println("AAAAAAA");
+        }
 }
