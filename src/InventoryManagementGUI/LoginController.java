@@ -15,7 +15,6 @@ public class LoginController {
         // Perform login logic here
         // Example: check if username and password are valid
         if (username.equals("admin") && password.equals("password")) {
-            // Login successful
             System.out.println("Login successful");
         } else {
             // Login failed
