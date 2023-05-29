@@ -53,7 +53,7 @@ public class Inventory {
     public void setInventoryHashMap() {
 
         //File file = new File("UserProfiles/" + this.currentUser + '/' + this.currentUser + "Inventory.txt");
-        File file = new File("C:/Users/Gorilla Rig/OneDrive - AUT University/Documents/NetBeansProjects/PDC-Assignment-2-GUI-Clone/resources/Admin/AdminInventory.txt");
+        File file = new File("resources/Admin/AdminInventory.txt");
         
         //checks if file exists
         if (file.exists()) {
@@ -312,7 +312,7 @@ public class Inventory {
         return this.inventoryTxt;
     }
 
-    //Overrides the toString of this class to print out the contents of the inventory2 hashMap in a formatted inventory style
+    //print out the contents of the inventory2 hashMap in a formatted inventory style stores in a JTable for GUI
     public JTable toTable() {
         String[] columnNames = {"ID", "PRODUCT NAME", "BRAND", "PRICE", "TYPE", "QUANTITY"};
 
