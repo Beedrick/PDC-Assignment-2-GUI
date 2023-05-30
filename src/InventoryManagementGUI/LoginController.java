@@ -5,6 +5,7 @@ package InventoryManagementGUI;
  * @author rocco
  */
 public class LoginController {
+
     private LoginGUI view;
 
     public void setView(LoginGUI view) {
@@ -16,6 +17,10 @@ public class LoginController {
         // Example: check if username and password are valid
         if (username.equals("admin") && password.equals("password")) {
             System.out.println("Login successful");
+            view.dispose();
+            MainMenuGUI userGUI = new MainMenuGUI();
+            userGUI.menuGUI();
+
         } else {
             // Login failed
             view.displayErrorMessage("Invalid username or password");

@@ -12,7 +12,7 @@ public class MainMenuGUI {
 
     private static JPanel contentPanel; // Panel to display contents
 
-    public static void main(String[] args) {
+    public void menuGUI() {
         JFrame frame = new JFrame("Inventory Management System");
         frame.setSize(1850, 900); // Set the size to 1850 x 900
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
