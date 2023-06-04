@@ -12,3 +12,9 @@ os.arch=amd64
 os.version=10.0
 derby.system.home=C:\Users\rocco\Downloads\BCIS\Y2 S1\COMP603\PDC-Assignment-2-GUI\src\Databases
 Database Class Loader started - derby.database.classpath=''
+----------------------------------------------------------------
+Mon Jun 05 00:47:12 NZST 2023: Shutting down Derby engine
+----------------------------------------------------------------
+Mon Jun 05 00:47:12 NZST 2023:
+Shutting down instance a816c00e-0188-8609-86e3-00005ee31ba8 on database directory C:\Users\rocco\Downloads\BCIS\Y2 S1\COMP603\PDC-Assignment-2-GUI\src\Databases\InventoryDB with class loader sun.misc.Launcher$AppClassLoader@1d44bcfa 
+----------------------------------------------------------------
