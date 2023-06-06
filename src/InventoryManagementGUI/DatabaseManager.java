@@ -4,7 +4,6 @@ package InventoryManagementGUI;
  *
  * @author rocco + beedrix
  */
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -12,9 +11,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class DatabaseManager {
-    private static final String USERNAME = "gui"; 
-    private static final String PASSWORD = "gui"; 
-    private static final String URL = "jdbc:derby://localhost:1527/InventoryDB;";
+
+    private static final String USERNAME = "gui";
+    private static final String PASSWORD = "gui";
+    private static final String URL = "jdbc:derby:InventoryDB1;";
+
     Connection conn;
 
     public DatabaseManager() {
@@ -27,17 +28,16 @@ public class DatabaseManager {
 
     public void establishConnection() {
         // Establish a connection to Database
-        try{
+        try {
             this.conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
             System.out.println(URL + " connected...");
+        } catch (SQLException ex) {
+            System.err.println(" > SQLException: " + ex.getMessage() + ex.getNextException());
         }
-        catch (SQLException ex) {
-            System.err.println(" > SQLException: " + ex.getMessage());
-        }  
     }
 
     public void closeConnections() {
-    // Closes connection to the database
+        // Closes connection to the database
         if (conn != null) {
             try {
                 conn.close();
@@ -61,7 +61,6 @@ public class DatabaseManager {
         }
         return resultSet;
     }
-    
 
     public void updateDB(String sql) {
         Connection connection = this.conn;
@@ -76,4 +75,74 @@ public class DatabaseManager {
             System.out.println(ex.getMessage());
         }
     }
+
+    public void createAccountsTable() {
+        try (Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD)) {
+            try (Statement statement = conn.createStatement()) {
+                String createTableSQL = "CREATE TABLE ACCOUNTS("
+                        + "USERID INT PRIMARY KEY, "
+                        + "USERNAME VARCHAR(50) NOT NULL, "
+                        + "PASSWORD VARCHAR(50) NOT NULL"
+                        + ")";
+                statement.executeUpdate(createTableSQL);
+                System.out.println("Table created successfully.");
+            }
+        } catch (SQLException e) {
+            if (e.getSQLState().equals("X0Y32")) {
+                // X0Y32 is the SQL state for table already exists exception in Apache Derby
+                System.out.println("Table already exists.");
+            } else {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void createUserInventoryTable() {
+        try (Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD)) {
+            try (Statement statement = conn.createStatement()) {
+                String createTableSQL = "CREATE TABLE INVENTORY("
+                        + "USERID INT NOT NULL, "
+                        + "PRODUCTID VARCHAR(50) NOT NULL, "
+                        + "PRODUCTNAME VARCHAR(50) NOT NULL, "
+                        + "PRODUCTBRAND VARCHAR(50) NOT NULL, "
+                        + "PRODUCTPRICE DOUBLE NOT NULL, "
+                        + "PRODUCTTYPE VARCHAR(50) NOT NULL, "
+                        + "PRODUCTQUANTITY INTEGER NOT NULL"
+                        + ")";
+                statement.executeUpdate(createTableSQL);
+                System.out.println("User Inventory Table created successfully.");
+            }
+        } catch (SQLException e) {
+            if (e.getSQLState().equals("X0Y32")) {
+                // X0Y32 is the SQL state for table already exists exception in Apache Derby
+                System.out.println("Table already exists.");
+            } else {
+                e.printStackTrace();
+            }
+        }
+    }
+    
+     public void createCarProductCatalogueTable() {
+        try (Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD)) {
+            try (Statement statement = conn.createStatement()) {
+                String createTableSQL = "CREATE TABLE CARPRODUCTCATALOGUE("
+                        + "PRODUCTID VARCHAR(50) NOT NULL, "
+                        + "PRODUCTNAME VARCHAR(50) NOT NULL, "
+                        + "PRODUCTBRAND VARCHAR(50) NOT NULL, "
+                        + "PRODUCTPRICE DOUBLE NOT NULL, "
+                        + "PRODUCTTYPE VARCHAR(50) NOT NULL"
+                        + ")";
+                statement.executeUpdate(createTableSQL);
+                System.out.println("User Inventory Table created successfully.");
+            }
+        } catch (SQLException e) {
+            if (e.getSQLState().equals("X0Y32")) {
+                // X0Y32 is the SQL state for table already exists exception in Apache Derby
+                System.out.println("Table already exists.");
+            } else {
+                e.printStackTrace();
+            }
+        }
+    }
+
 }
