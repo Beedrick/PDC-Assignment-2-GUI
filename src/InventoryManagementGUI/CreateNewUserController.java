@@ -31,11 +31,13 @@ public class CreateNewUserController {
         int count = 0;
 
         try { 
-            String query = "SELECT COUNT(*) FROM USERS WHERE LOWER(Username) = LOWER(?)";
+            System.out.println("reached 1");
+            String query = "SELECT COUNT(*) FROM ACCOUNTS WHERE LOWER(USERNAME) = LOWER(?)";
             pstmt = conn.prepareStatement(query);
+            System.out.println("reached 2");
             pstmt.setString(1, username);
             rs = pstmt.executeQuery();
-
+            System.out.println("reached 3");
             while (rs.next()) {
                 count = rs.getInt(1);
             }
@@ -58,7 +60,7 @@ public class CreateNewUserController {
 
         try {
             stmt = conn.createStatement();
-            String query = "SELECT UserID FROM Users ORDER BY UserID DESC FETCH FIRST 1 ROWS ONLY";
+            String query = "SELECT USERID FROM ACCOUNTS ORDER BY UserID DESC FETCH FIRST 1 ROWS ONLY";
             rs = stmt.executeQuery(query);
 
             if (rs.next()) {
@@ -79,7 +81,7 @@ public class CreateNewUserController {
                 updateUserModel(generateUserID(), username, password);
 
                 // Insert the new user details into the Users table
-                String insertQuery = "INSERT INTO Users (UserID, Username, Password) VALUES (?, ?, ?)";
+                String insertQuery = "INSERT INTO ACCOUNTS (USERID, USERNAME, PASSWORD) VALUES (?, ?, ?)";
                 try (PreparedStatement pstmt = conn.prepareStatement(insertQuery)) {
                     pstmt.setInt(1, model.getUserID());
                     pstmt.setString(2, model.getUsername());

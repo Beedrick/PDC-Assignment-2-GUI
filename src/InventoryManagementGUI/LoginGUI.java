@@ -130,6 +130,7 @@ public class LoginGUI extends JFrame {
                 // sends user to signup page
                 dispose();
                 controller.directToSignup();
+
             }
         });
     }

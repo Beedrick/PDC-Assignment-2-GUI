@@ -99,10 +99,12 @@ public class CreateNewUserGUI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 resetTextFields();
                 dispose(); // Dispose the CreateNewUserGUI window
-
+                
                 // Return to the LoginGUI window
                 LoginController loginController = new LoginController();
                 LoginGUI loginGUI = new LoginGUI(loginController);
+                loginController.setView(loginGUI);
+                loginGUI.setVisible(true);
             }
         });
     }
@@ -154,7 +156,3 @@ public class CreateNewUserGUI extends JFrame {
         JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
     }
 }
-
-
-
-

@@ -26,7 +26,7 @@ public class LoginController {
     public boolean validateLogin(String username, String password) {
     // Checks if the username-password combo is valid
         boolean valid = false;
-        String query = "SELECT * FROM Users WHERE LOWER(username) = LOWER(?) AND password = ?";
+        String query = "SELECT * FROM Accounts WHERE LOWER(username) = LOWER(?) AND password = ?";
         ResultSet rs = null;
         PreparedStatement pstmt = null;
 

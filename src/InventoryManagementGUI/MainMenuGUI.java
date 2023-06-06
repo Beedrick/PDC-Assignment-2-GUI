@@ -3,10 +3,17 @@ package InventoryManagementGUI;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 
 public class MainMenuGUI {
 
     private static JPanel contentPanel; // Panel to display contents
+    private DatabaseManager databaseManager;
 
     public void menuGUI() {
         JFrame frame = new JFrame("Inventory Management System");
@@ -14,7 +21,7 @@ public class MainMenuGUI {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel sidePanel = new JPanel();
-        sidePanel.setBackground(Color.lightGray);
+        sidePanel.setBackground(new Color(40, 44, 52));
         sidePanel.setLayout(new GridBagLayout());
 
         // Define common styles
@@ -43,7 +50,65 @@ public class MainMenuGUI {
 
         addToSidePanel(sidePanel, exitButton, 0, 1);
 
-        // ... (Other buttons)
+        // Box 3: Additional Button 1
+        JButton additionalButton1 = createStyledButton("Car Products Catalogue", buttonFont, buttonColor);
+        additionalButton1.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                databaseManager = new DatabaseManager();
+
+                String sql = "SELECT * FROM CARPRODUCTCATALOGUE"; // SQL query to select all rows from the table
+                ResultSet resultSet = databaseManager.queryDB(sql); // Execute the query and get the result set
+
+                // Create a table model to hold the data from the result set
+                DefaultTableModel tableModel = new DefaultTableModel();
+                try {
+                    // Get the column names from the result set metadata
+                    ResultSetMetaData metaData = resultSet.getMetaData();
+                    int columnCount = metaData.getColumnCount();
+                    for (int i = 1; i <= columnCount; i++) {
+                        tableModel.addColumn(metaData.getColumnLabel(i));
+                    }
+
+                    // Add the rows to the table model
+                    while (resultSet.next()) {
+                        Object[] rowData = new Object[columnCount];
+                        for (int i = 1; i <= columnCount; i++) {
+                            rowData[i - 1] = resultSet.getObject(i);
+                        }
+                        tableModel.addRow(rowData);
+                    }
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+
+                JTable carCatalogueTable = new JTable(tableModel); // Create a table using the table model
+                customizeTable(carCatalogueTable);
+                displayContent(carCatalogueTable); // Display the table in full screen
+            }
+        });
+
+        addToSidePanel(sidePanel, additionalButton1, 0, 2);
+
+        // Box 4: Additional Button 2
+        JButton additionalButton2 = createStyledButton("Button 2", buttonFont, buttonColor);
+        additionalButton2.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Action for Button 2 to be set
+            }
+        });
+
+        addToSidePanel(sidePanel, additionalButton2, 0, 3);
+
+        // Box 5: Additional Button 3
+        JButton additionalButton3 = createStyledButton("Button 3", buttonFont, buttonColor);
+        additionalButton3.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Action for Button 3 to be set
+            }
+        });
+
+        addToSidePanel(sidePanel, additionalButton3, 0, 4);
+
         frame.add(sidePanel, BorderLayout.WEST);
 
         // Panel to display contents
@@ -72,11 +137,21 @@ public class MainMenuGUI {
         return button;
     }
 
-// Update the displayContent method to accept a JTable parameter
+    // Update the displayContent method to accept a JTable parameter
     private static void displayContent(JTable table) {
         contentPanel.removeAll(); // Clear previous content
 
+        // Create a scrollable pane for the table
         JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+
+        // Set the layout manager of the contentPanel to BorderLayout
+        contentPanel.setLayout(new BorderLayout());
+
+        // Set the preferred size of the scrollPane to match the contentPanel's size
+        scrollPane.setPreferredSize(contentPanel.getSize());
+
+        // Set the scroll pane as the content of the panel
         contentPanel.add(scrollPane, BorderLayout.CENTER);
         contentPanel.revalidate(); // Refresh the panel
         contentPanel.repaint();
