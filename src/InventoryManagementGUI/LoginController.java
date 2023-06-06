@@ -70,6 +70,7 @@ public class LoginController {
     }
     
     public void directToMainMenu() {
-        
+        MainMenuGUI userGUI = new MainMenuGUI();
+        userGUI.menuGUI();
     }
 }
