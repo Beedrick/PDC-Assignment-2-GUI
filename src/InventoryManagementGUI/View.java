@@ -9,6 +9,14 @@ import javax.swing.SwingUtilities;
 public class View {
 
     public static void main(String[] args) {
+        
+        //calls the database manager to create tables
+        DatabaseManager dB = new DatabaseManager();
+        dB.establishConnection();
+        dB.createAccountsTable();
+        dB.createCarProductCatalogueTable();
+        dB.createUserInventoryTable();
+        
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 LoginController controller = new LoginController();
