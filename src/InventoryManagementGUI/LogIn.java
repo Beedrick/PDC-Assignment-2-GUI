@@ -2,15 +2,31 @@ package InventoryManagementGUI;
 
 /**
  *
- * @author Gorilla Rig
+ * @author rocco + beedrix
  */
+
 public class LogIn {
-    
-    private int number;
-    
-    public static void main(String[] args) {
-        System.out.println("Testing updates resolved conflict");
+    private String username;
+    private String password;
+
+    public LogIn() {
+        this.username = username;
+        this.password = password;
     }
-    
-    
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }
