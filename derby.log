@@ -1,0 +1,13 @@
+----------------------------------------------------------------
+Tue Jun 06 18:07:34 NZST 2023:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance a816c00e-0188-8f51-5c9e-00000ec7f820 
+on database directory C:\NetBeansProjects\PDC-Assignment-2-GUI-Clone\InventoryDB1 with class loader sun.misc.Launcher$AppClassLoader@29453f44 
+Loaded from file:/C:/NetBeansProjects/PDC-Assignment-2-GUI-Clone/db-derby-10.14.2.0-lib/lib/derby.jar
+java.vendor=Oracle Corporation
+java.runtime.version=1.8.0_371-b11
+user.dir=C:\NetBeansProjects\PDC-Assignment-2-GUI-Clone
+os.name=Windows 10
+os.arch=amd64
+os.version=10.0
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
