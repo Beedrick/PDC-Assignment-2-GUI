@@ -8,6 +8,10 @@ public class LoginController {
 
     private LoginGUI view;
 
+    public LoginController() {
+
+    }
+
     public void setView(LoginGUI view) {
         this.view = view;
     }
@@ -17,9 +21,11 @@ public class LoginController {
         // Example: check if username and password are valid
         if (username.equals("admin") && password.equals("password")) {
             System.out.println("Login successful");
-            view.dispose();
+
             MainMenuGUI userGUI = new MainMenuGUI();
             userGUI.menuGUI();
+
+            view.dispose();
 
         } else {
             // Login failed
