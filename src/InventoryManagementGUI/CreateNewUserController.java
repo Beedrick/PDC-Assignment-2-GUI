@@ -31,13 +31,10 @@ public class CreateNewUserController {
         int count = 0;
 
         try { 
-            System.out.println("reached 1");
             String query = "SELECT COUNT(*) FROM ACCOUNTS WHERE LOWER(USERNAME) = LOWER(?)";
             pstmt = conn.prepareStatement(query);
-            System.out.println("reached 2");
             pstmt.setString(1, username);
             rs = pstmt.executeQuery();
-            System.out.println("reached 3");
             while (rs.next()) {
                 count = rs.getInt(1);
             }

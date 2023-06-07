@@ -14,7 +14,7 @@ public class DatabaseManager {
 
     private static final String USERNAME = "gui";
     private static final String PASSWORD = "gui";
-    private static final String URL = "jdbc:derby:InventoryDB1;create=true";
+    private static final String URL = "jdbc:derby:InventoryDB1;";
 
     Connection conn;
 
