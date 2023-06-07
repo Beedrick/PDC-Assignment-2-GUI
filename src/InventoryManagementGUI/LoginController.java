@@ -9,14 +9,16 @@ import java.sql.*;
 
 public class LoginController {
     private LoginGUI view;
-    private PopupWindow popupWindow;
     private LogIn model;
+    private MainMenuController menuController;
+    private PopupWindow popupWindow;
     public static Connection conn;  
 
     public LoginController() {
         DatabaseManager dbManager = new DatabaseManager();
         this.conn = dbManager.getConnection();
         this.model = new LogIn();
+        this.menuController = new MainMenuController();
     }
 
     public void setView(LoginGUI view) {
@@ -53,24 +55,36 @@ public class LoginController {
         return valid;
     } 
 
-    public void login(String username, String password) {
+    public boolean login(String username, String password) {
         // Checks for valid username-password match and then allows the user to login
+        boolean closeWindow = false;
+
         if (validateLogin(username, password)) {
+            updateCurrentUser(username);
             directToMainMenu();
+            closeWindow = true;
         } else {
             view.resetTextFields();
             popupWindow = new PopupWindow("Invalid login", "Your username or password is incorrect. \nPlease try again.");
         }
+
+        return closeWindow;
+    }
+    
+    public void updateCurrentUser(String username) {
+    // Sets logged in user details
+        model.setUsername(username);
+        menuController.setCurrentUser(username); // gives MainMenu the current username
     }
 
     public void directToSignup() {
+    // Sends user to signup page
         CreateNewUserController createUserController = new CreateNewUserController();
         CreateNewUserGUI createUserGUI = new CreateNewUserGUI(createUserController);
-        createUserGUI.setVisible(true);
     }
     
     public void directToMainMenu() {
-        MainMenuGUI userGUI = new MainMenuGUI();
-        userGUI.menuGUI();
+    // Sends user to main menu
+        MainMenuGUI menuGUI = new MainMenuGUI(menuController);
     }
 }

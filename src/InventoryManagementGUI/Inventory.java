@@ -1,10 +1,49 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package InventoryManagementGUI;
 
-import java.awt.Font;
+public class Inventory {
+    private String productID;
+    private String productName;
+    private String productBrand;
+    private double productPrice;
+    private String productType;
+    private int productQuantity;
+
+    public Inventory(String productID, String productName, String productBrand, double productPrice, String productType, int productQuantity) {
+        this.productID = productID;
+        this.productName = productName;
+        this.productBrand = productBrand;
+        this.productPrice = productPrice;
+        this.productType = productType;
+        this.productQuantity = productQuantity;
+    }
+
+    public String getProductID() {
+        return productID;
+    }
+
+    public String getProductName() {
+        return productName;
+    }
+
+    public String getProductBrand() {
+        return productBrand;
+    }
+
+    public double getProductPrice() {
+        return productPrice;
+    }
+
+    public String getProductType() {
+        return productType;
+    }
+
+    public int getProductQuantity() {
+        return productQuantity;
+    }
+}
+
+// OLD INVENTORY CODE 
+/*import java.awt.Font;
 import java.io.BufferedReader;
 import java.util.HashMap;
 import java.util.Scanner;
@@ -333,4 +372,4 @@ public class Inventory {
         return table;
     }
 
-}
+} */

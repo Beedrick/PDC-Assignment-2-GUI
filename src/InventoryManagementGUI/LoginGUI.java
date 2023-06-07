@@ -116,7 +116,9 @@ public class LoginGUI extends JFrame {
                 String password = new String(passwordChars);
 
                 // Notify the controller about the login attempt
-                controller.login(username, password);
+                if(controller.login(username, password)) {
+                    dispose();
+                }
             }
         });
 
