@@ -17,7 +17,7 @@ public class LoginGUI extends JFrame {
     private JPanel mainPanel;
     private JPanel inputPanel;
     private GridBagConstraints gbc;
-
+    
     public LoginGUI(LoginController controller) {
         this.controller = controller;
         this.createUserButton = new JButton("Signup");
@@ -30,15 +30,15 @@ public class LoginGUI extends JFrame {
         this.usernameField = new JTextField();
         this.passwordField = new JPasswordField();
         this.gbc = new GridBagConstraints();
-
+        
         setWindow();
         createTextField();
         createButton();
         createLabel();
         createPanel();
-        addAllContents();
+        addAllContents();        
     }
-
+    
     public void setWindow() {
         setTitle("Login");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -46,7 +46,7 @@ public class LoginGUI extends JFrame {
         setResizable(false);
         setLocationRelativeTo(null);
     }
-
+    
     public void addAllContents() {
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         mainPanel.setBackground(new Color(40, 44, 52));
@@ -99,12 +99,11 @@ public class LoginGUI extends JFrame {
         passwordLabel.setForeground(Color.WHITE);
 
     }
-
+    
     public void createTextField() {
         usernameField.setPreferredSize(new Dimension(200, 30));
         passwordField.setPreferredSize(new Dimension(200, 30));
     }
-
     public void createButton() {
         loginButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         loginButton.setBackground(new Color(95, 158, 160));
@@ -118,7 +117,7 @@ public class LoginGUI extends JFrame {
                 String password = new String(passwordChars);
 
                 // Notify the controller about the login attempt
-                if (controller.login(username, password)) {
+                if(controller.login(username, password)) {
                     dispose();
                 }
             }
@@ -138,9 +137,9 @@ public class LoginGUI extends JFrame {
             }
         });
     }
-
+    
     public void resetTextFields() {
-        // Clears text fields after user has pressed signup/goback
+    // Clears text fields after user has pressed signup/goback
         usernameField.setText("");
         passwordField.setText("");
     }

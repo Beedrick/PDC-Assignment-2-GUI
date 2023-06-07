@@ -4,15 +4,15 @@ package InventoryManagementGUI;
  *
  * @author rocco + beedrix
  */
-
 import java.sql.*;
 
 public class LoginController {
+
     private LoginGUI view;
     private LogIn model;
     private MainMenuController menuController;
     private PopupWindow popupWindow;
-    public static Connection conn;  
+    public static Connection conn;
 
     public LoginController() {
         DatabaseManager dbManager = new DatabaseManager();
@@ -26,13 +26,13 @@ public class LoginController {
     }
 
     public boolean validateLogin(String username, String password) {
-    // Checks if the username-password combo is valid
+        // Checks if the username-password combo is valid
         boolean valid = false;
         String query = "SELECT * FROM Accounts WHERE LOWER(username) = LOWER(?) AND password = ?";
         ResultSet rs = null;
         PreparedStatement pstmt = null;
 
-        try { 
+        try {
             pstmt = conn.prepareStatement(query);
             pstmt.setString(1, username);
             pstmt.setString(2, password);
@@ -53,7 +53,7 @@ public class LoginController {
             }
         }
         return valid;
-    } 
+    }
 
     public boolean login(String username, String password) {
         // Checks for valid username-password match and then allows the user to login
@@ -70,21 +70,21 @@ public class LoginController {
 
         return closeWindow;
     }
-    
+
     public void updateCurrentUser(String username) {
-    // Sets logged in user details
+        // Sets logged in user details
         model.setUsername(username);
         menuController.setCurrentUser(username); // gives MainMenu the current username
     }
 
     public void directToSignup() {
-    // Sends user to signup page
+        // Sends user to signup page
         CreateNewUserController createUserController = new CreateNewUserController();
         CreateNewUserGUI createUserGUI = new CreateNewUserGUI(createUserController);
     }
-    
+
     public void directToMainMenu() {
-    // Sends user to main menu
+        // Sends user to main menu
         MainMenuGUI menuGUI = new MainMenuGUI(menuController);
     }
 }

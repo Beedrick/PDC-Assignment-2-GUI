@@ -4,16 +4,18 @@ package InventoryManagementGUI;
  *
  * @author rocco + beedrix
  */
+
 import java.sql.*;
 import java.sql.ResultSetMetaData;
 
-public class MainMenuController {
 
+public class MainMenuController {
+    
     private String currentUser;
     private MainMenuGUI view;
     private PopupWindow popupWindow;
     private Inventory[] inventoryArray;
-    public static Connection conn;
+    public static Connection conn;  
 
     public MainMenuController() {
         DatabaseManager dbManager = new DatabaseManager();
@@ -35,7 +37,7 @@ public class MainMenuController {
         PreparedStatement pstmt = null;
         int userID = 0;
 
-        try {
+        try { 
             String query = "SELECT UserID FROM ACCOUNTS WHERE LOWER(USERNAME) = LOWER(?)";
             pstmt = conn.prepareStatement(query);
             pstmt.setString(1, user);
@@ -49,16 +51,16 @@ public class MainMenuController {
         }
         return userID;
     }
-
+    
     public Inventory[] getInventory() {
-        // Returns current users inventory from DB as an Inventory array
+    // Returns current users inventory from DB as an Inventory array
         int currentUserID = getUserID(currentUser); // Get userID to get inventory
         System.out.println("UserID: " + currentUserID);
         int index = 0;
         ResultSet rs = null;
         PreparedStatement pstmt = null;
 
-        try {
+        try { 
             String query = "SELECT * FROM INVENTORY WHERE USERID = ?";
             pstmt = conn.prepareStatement(query);
             pstmt.setInt(1, currentUserID);
@@ -70,25 +72,25 @@ public class MainMenuController {
 
             while (rs.next()) { // populate inventory objects based on SQL records
                 Inventory inventory = new Inventory(
-                        rs.getString("PRODUCTID"),
-                        rs.getString("PRODUCTNAME"),
-                        rs.getString("PRODUCTBRAND"),
-                        rs.getDouble("PRODUCTPRICE"),
-                        rs.getString("PRODUCTTYPE"),
-                        rs.getInt("PRODUCTQUANTITY")
-                );
+                    rs.getString("PRODUCTID"),
+                    rs.getString("PRODUCTNAME"),
+                    rs.getString("PRODUCTBRAND"),
+                    rs.getDouble("PRODUCTPRICE"),
+                    rs.getString("PRODUCTTYPE"), 
+                    rs.getInt("PRODUCTQUANTITY")
+                );       
                 inventoryArray[index] = inventory;
                 index++;
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        }
+        } 
 
         return inventoryArray;
     }
 
     public int getInventorySize(ResultSet rsCount) {
-        // Return size of users inventory so that can create an Inventory array with correct size
+    // Return size of users inventory so that can create an Inventory array with correct size
         int rowCount = 0;
 
         try {
