@@ -13,7 +13,6 @@ import javax.swing.BorderFactory;
 import javax.swing.border.Border;
 import java.util.Arrays;
 
-
 public class MainMenuGUI {
 
     private MainMenuController controller;
@@ -30,7 +29,9 @@ public class MainMenuGUI {
     private JButton updateQuantityButton;
     private JTextField productIDTextField;
     private JTextField quantityTextField;
-    private JButton confirmButton;
+    private JButton updateAddButton;
+    private JButton updateRemoveButton;
+    private JButton changeQuantityButton;
     private GridBagConstraints constraints;
     private static JPanel contentPanel; // Panel to display contents
     private DatabaseManager databaseManager;
@@ -53,7 +54,9 @@ public class MainMenuGUI {
         this.exitButton = createStyledButton("Exit", buttonFont, buttonColor);
         this.productIDTextField = new JTextField();
         this.quantityTextField = new JTextField();
-        this.confirmButton = new JButton("");
+        this.updateAddButton = new JButton("");
+        this.updateRemoveButton = new JButton("");
+        this.changeQuantityButton = new JButton("");
 
         createOrderButton = createStyledButton("Create Order", buttonFont, buttonColor);
         createOrderButton.setVisible(false);
@@ -133,7 +136,7 @@ public class MainMenuGUI {
         gbc.anchor = GridBagConstraints.WEST; // Left-align the text field
         contentPanel.add(productIDTextField, gbc);
 
-        if(updateType == 1 || updateType == 3) {
+        if (updateType == 1 || updateType == 3) {
             JLabel quantityLabel = new JLabel(updateStrings[1]);
             quantityLabel.setFont(new Font("Arial", Font.PLAIN, 18)); // Update font and size
             gbc.gridx = 0;
@@ -150,24 +153,60 @@ public class MainMenuGUI {
         }
 
         // Update confirm button based on updateType
-        confirmButton.setText(updateStrings[2]);
-        confirmButton.setFont(new Font("Arial", Font.BOLD, 18)); // Update font and size
-        if (updateType == 1) {
-            confirmButton.setBackground(new Color(0, 150, 0)); // Darker green color
-        } else if (updateType == 2) {
-            confirmButton.setBackground(Color.RED); // Red color
-        } else if (updateType == 3) {
-            confirmButton.setBackground(Color.BLUE); // Blue color
-        }
+        if (updateType == 1) { // ADD PRODUCT
+            updateAddButton.setVisible(true);
+            updateRemoveButton.setVisible(false);
+            changeQuantityButton.setVisible(true);
 
-        confirmButton.setForeground(Color.WHITE);
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        gbc.gridwidth = 2;
-        gbc.anchor = GridBagConstraints.CENTER; // Center-align the button
-        gbc.ipady = 20; // Increase button height
-        contentPanel.add(confirmButton, gbc);
-        confirmButton.setBorder(null);
+            updateAddButton.setText(updateStrings[2]);
+            updateAddButton.setFont(new Font("Arial", Font.BOLD, 18)); // Update font and size
+            updateAddButton.setBackground(new Color(0, 150, 0)); // Darker green color
+
+            updateAddButton.setForeground(Color.WHITE);
+            gbc.gridx = 0;
+            gbc.gridy = 3;
+            gbc.gridwidth = 2;
+            gbc.anchor = GridBagConstraints.CENTER; // Center-align the button
+            gbc.ipady = 20; // Increase button height
+            contentPanel.add(updateAddButton, gbc);
+            updateAddButton.setBorder(null);
+
+        } else if (updateType == 2) { // REMOVE PRODUCT
+            updateAddButton.setVisible(false);
+            updateRemoveButton.setVisible(true);
+            changeQuantityButton.setVisible(true);
+
+            updateRemoveButton.setText(updateStrings[2]);
+            updateRemoveButton.setFont(new Font("Arial", Font.BOLD, 18)); // Update font and size
+            updateRemoveButton.setBackground(new Color(0, 150, 0)); // Darker green color
+
+            updateRemoveButton.setForeground(Color.WHITE);
+            gbc.gridx = 0;
+            gbc.gridy = 3;
+            gbc.gridwidth = 2;
+            gbc.anchor = GridBagConstraints.CENTER; // Center-align the button
+            gbc.ipady = 20; // Increase button height
+            contentPanel.add(updateRemoveButton, gbc);
+            updateRemoveButton.setBorder(null);
+
+        } else if (updateType == 3) { // UPDATE QUANTITY
+            updateAddButton.setVisible(false);
+            updateRemoveButton.setVisible(false);
+            changeQuantityButton.setVisible(true);
+
+            changeQuantityButton.setText(updateStrings[2]);
+            changeQuantityButton.setFont(new Font("Arial", Font.BOLD, 18)); // Update font and size
+            changeQuantityButton.setBackground(new Color(0, 150, 0)); // Darker green color
+
+            changeQuantityButton.setForeground(Color.WHITE);
+            gbc.gridx = 0;
+            gbc.gridy = 3;
+            gbc.gridwidth = 2;
+            gbc.anchor = GridBagConstraints.CENTER; // Center-align the button
+            gbc.ipady = 20; // Increase button height
+            contentPanel.add(changeQuantityButton, gbc);
+            changeQuantityButton.setBorder(null);
+        }
 
         // Repaint the content panel to reflect the changes
         contentPanel.revalidate();
@@ -219,8 +258,7 @@ public class MainMenuGUI {
         addToSidePanel(sidePanel, removeProductButton, 0, 2);
         addToSidePanel(sidePanel, updateQuantityButton, 0, 3);
         addToSidePanel(sidePanel, viewCarProductsButton, 0, 4);
-        addToSidePanel(sidePanel, createOrderButton, 0, 5);
-        addToSidePanel(sidePanel, exitButton, 0, 6);
+        addToSidePanel(sidePanel, exitButton, 0, 5);
     }
 
     public void setButtons() {
@@ -263,7 +301,7 @@ public class MainMenuGUI {
                 displayUpdateInventory(1);
 
                 // confirmButton method for adding product
-                confirmButton.addActionListener(new ActionListener() {
+                updateAddButton.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         // get values from text fields
@@ -272,22 +310,25 @@ public class MainMenuGUI {
                         int quantity = Integer.parseInt(quantityText);
 
                         controller.addProduct(productID, quantity); // add product to DB
+                        resetTextFields();
                     }
                 });
             }
         });
+        
         // Box 3: Remove a product button
         removeProductButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 displayUpdateInventory(2);
 
                 // confirmButton method for removing product
-                confirmButton.addActionListener(new ActionListener() {
+                updateRemoveButton.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         // get values from text fields
                         String productID = productIDTextField.getText();
                         controller.removeProduct(productID); // remove product from DB
+                        resetTextFields();
                     }
                 });
             }
@@ -297,6 +338,20 @@ public class MainMenuGUI {
         updateQuantityButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 displayUpdateInventory(3);
+
+                // confirmButton method for adding product
+                changeQuantityButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        // get values from text fields
+                        String productID = productIDTextField.getText();
+                        String quantityText = quantityTextField.getText();
+                        int quantity = Integer.parseInt(quantityText);
+
+                        controller.updateProductQuantity(productID, quantity); // update quantity of a product
+                        resetTextFields();
+                    }
+                });
             }
         });
 
@@ -384,5 +439,10 @@ public class MainMenuGUI {
 
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+    }
+
+    public void resetTextFields() {
+        productIDTextField.setText("");
+        quantityTextField.setText("");
     }
 }

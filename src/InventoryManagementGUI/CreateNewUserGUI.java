@@ -15,7 +15,7 @@ public class CreateNewUserGUI extends JFrame {
     private JLabel passwordLabel;
     private JPanel inputPanel;
     private GridBagConstraints gbc;
-
+    
 
     public CreateNewUserGUI(CreateNewUserController controller) {
         this.controller = controller;
