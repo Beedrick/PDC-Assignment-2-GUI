@@ -9,6 +9,8 @@ import java.sql.SQLException;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
+import javax.swing.BorderFactory;
+import javax.swing.border.Border;
 
 public class MainMenuGUI {
     private MainMenuController controller;
@@ -18,14 +20,18 @@ public class MainMenuGUI {
     private JPanel sidePanel;
     private JButton viewInventoryButton;
     private JButton exitButton;
-    private JButton additionalButton1;
-    private JButton additionalButton2;
-    private JButton additionalButton3;
+    private JButton viewCarProductsButton;
+    private JButton addProductButton;
+    private JButton removeProductButton;
+    private JButton updateQuantityButton;
+    private JTextField productIDTextField;
+    private JTextField quantityTextField;
+    private JButton confirmButton;
     private GridBagConstraints constraints;
     private static JPanel contentPanel; // Panel to display contents
     private DatabaseManager databaseManager;
     private JTable inventoryTable;
-    private DefaultTableModel inventoryTableModel;  
+    private DefaultTableModel inventoryTableModel;
 
     public MainMenuGUI(MainMenuController controller) {
         this.controller = controller;
@@ -35,10 +41,14 @@ public class MainMenuGUI {
         this.sidePanel = new JPanel();
         this.constraints = new GridBagConstraints();
         this.viewInventoryButton = createStyledButton("View Inventory", buttonFont, buttonColor);
+        this.viewCarProductsButton = createStyledButton("Car Products Catalogue", buttonFont, buttonColor);
+        this.addProductButton = createStyledButton("Add Product", buttonFont, buttonColor);
+        this.removeProductButton = createStyledButton("Remove Product", buttonFont, buttonColor);
+        this.updateQuantityButton = createStyledButton("Update Quantity", buttonFont, buttonColor);
         this.exitButton = createStyledButton("Exit", buttonFont, buttonColor);
-        this.additionalButton1 = createStyledButton("Car Products Catalogue", buttonFont, buttonColor);
-        this.additionalButton2 = createStyledButton("Button 2", buttonFont, buttonColor);
-        this.additionalButton3 = createStyledButton("Button 3", buttonFont, buttonColor);
+        this.productIDTextField = new JTextField();
+        this.quantityTextField = new JTextField();
+        this.confirmButton = new JButton("");
         
         createTable();
         setFrame();
@@ -73,8 +83,91 @@ public class MainMenuGUI {
         sidePanel.add(component, constraints);
     }
 
-    public void displayContent(JTable table) {
-    // Update the displayContent method to accept a JTable parameter
+    public void displayUpdateInventory(int updateType) {
+    /* Updates the panel to display content for user to update their inventory
+        UPDATE TYPES:
+            1) Add a product
+            2) Remove a product
+            3) Update quantity of product */
+
+        String[] updateStrings = controller.getUpdateStrings(updateType);
+
+        contentPanel.removeAll(); // Clear previous content
+
+        // Set GridBagLayout as the layout manager
+        contentPanel.setLayout(new GridBagLayout());
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(10, 10, 10, 10); // Add spacing between components
+
+        JLabel titleLabel = new JLabel(updateStrings[0]);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24)); // Update font and size
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER; // Center-align the title
+        contentPanel.add(titleLabel, gbc);
+
+        // Create labels for ProductID and Add
+        JLabel productIDLabel = new JLabel("Product ID: ");
+        productIDLabel.setFont(new Font("Arial", Font.PLAIN, 18)); // Update font and size
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.gridwidth = 1;
+        gbc.anchor = GridBagConstraints.EAST; // Right-align the label
+        contentPanel.add(productIDLabel, gbc);
+
+        productIDTextField.setPreferredSize(new Dimension(250, 40));
+        productIDTextField.setFont(new Font("Arial", Font.PLAIN, 18));
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.WEST; // Left-align the text field
+        contentPanel.add(productIDTextField, gbc);
+
+        JLabel quantityLabel = new JLabel(updateStrings[1]);
+        quantityLabel.setFont(new Font("Arial", Font.PLAIN, 18)); // Update font and size
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.anchor = GridBagConstraints.EAST; // Right-align the label
+        contentPanel.add(quantityLabel, gbc);
+
+        quantityTextField.setPreferredSize(new Dimension(250, 40));
+        quantityTextField.setFont(new Font("Arial", Font.PLAIN, 18));
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        gbc.anchor = GridBagConstraints.WEST; // Left-align the text field
+        contentPanel.add(quantityTextField, gbc);
+
+        // Update confirm button based on updateType
+        confirmButton.setText(updateStrings[2]);
+        confirmButton.setFont(new Font("Arial", Font.BOLD, 18)); // Update font and size
+        if(updateType == 1) { 
+            confirmButton.setBackground(new Color(0, 150, 0)); // Darker green color
+        }
+        else if (updateType == 2) {
+            confirmButton.setBackground(Color.RED); // Red color
+        }
+        else if (updateType == 3) {
+            confirmButton.setBackground(Color.BLUE); // Blue color
+        }
+
+        confirmButton.setForeground(Color.WHITE);
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER; // Center-align the button
+        gbc.ipady = 20; // Increase button height
+        contentPanel.add(confirmButton, gbc);
+        confirmButton.setBorder(null);
+
+        // Repaint the content panel to reflect the changes
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+
+    public void displayTable(JTable table) {
+    // Update the displayTable method to accept a JTable parameter
         contentPanel.removeAll(); // Clear previous content
 
         // Create a scrollable pane for the table
@@ -106,10 +199,11 @@ public class MainMenuGUI {
         
         // Add side panel contents
         addToSidePanel(sidePanel, viewInventoryButton, 0, 0);
-        addToSidePanel(sidePanel, exitButton, 0, 1);
-        addToSidePanel(sidePanel, additionalButton1, 0, 2);
-        addToSidePanel(sidePanel, additionalButton2, 0, 3);
-        addToSidePanel(sidePanel, additionalButton3, 0, 4);
+        addToSidePanel(sidePanel, addProductButton, 0, 1);
+        addToSidePanel(sidePanel, removeProductButton, 0, 2);
+        addToSidePanel(sidePanel, updateQuantityButton, 0, 3);
+        addToSidePanel(sidePanel, viewCarProductsButton, 0, 4);
+        addToSidePanel(sidePanel, exitButton, 0, 5);
     }
 
     public void setButtons() {
@@ -133,17 +227,45 @@ public class MainMenuGUI {
                 }
 
                 inventoryTable = new JTable(inventoryTableModel);
-                displayContent(inventoryTable);
+                displayTable(inventoryTable);
             }
         });
-        // Box 2: Exit Program
-        exitButton.addActionListener(new ActionListener() {
+
+        // Box 2: Add a product button
+        addProductButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                System.exit(0); // Exit the program with a status code of 0
+                displayUpdateInventory(1);
+                
+                // confirmButton method for adding product
+                confirmButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    // get values from text fields
+                    String productID = productIDTextField.getText();
+                    String quantityText = quantityTextField.getText();
+                    int quantity = Integer.parseInt(quantityText);
+
+                    controller.addProduct(productID, quantity); // add product to DB
+                    }
+                });
             }
         });
-        // Box 3: Additional Button 1
-        additionalButton1.addActionListener(new ActionListener() {
+        // Box 3: Remove a product button
+        removeProductButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                displayUpdateInventory(2);
+            }
+        }); 
+
+        // Box 4: Update quantity of a product button
+        updateQuantityButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                displayUpdateInventory(3);
+            }
+        }); 
+
+        // Box 5: viewCarProducts Button
+        viewCarProductsButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 databaseManager = new DatabaseManager();
 
@@ -174,21 +296,16 @@ public class MainMenuGUI {
 
                 JTable carCatalogueTable = new JTable(tableModel); // Create a table using the table model
                 //customizeTable(carCatalogueTable);
-                displayContent(carCatalogueTable); // Display the table in full screen
+                displayTable(carCatalogueTable); // Display the table in full screen
             }
         });
-        // Box 4: Additional Button 2
-        additionalButton2.addActionListener(new ActionListener() {
+
+        // Box 6: Exit Program
+        exitButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // Action for Button 2 to be set
+                System.exit(0); // Exit the program with a status code of 0
             }
         });
-        // Box 5: Additional Button 3
-        additionalButton3.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                // Action for Button 3 to be set
-            }
-        }); 
     }
 
     public void displayFrame() {

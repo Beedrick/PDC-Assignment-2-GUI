@@ -111,4 +111,35 @@ public class MainMenuController {
 
         return rowCount;
     }
+
+    public String[] getUpdateStrings(int updateType) {
+    // Returns array of strings to update the GUI for either add product/remove product/update quantity
+        String[] updateStrings = new String[3];
+
+        if (updateType == 1) {
+            updateStrings[0] = "    Add a product to inventory";
+            updateStrings[1] = "Add quantity: ";
+            updateStrings[2] = "add product(s)";
+        } 
+        else if (updateType == 2) {
+            updateStrings[0] = "Remove a product from inventory";
+            updateStrings[1] = "Remove quantity: ";
+            updateStrings[2] = "remove product(s)";
+        }
+        else if (updateType == 3) {
+            updateStrings[0] = "Update quantity of product in your inventory";
+            updateStrings[1] = "Update quantity: ";
+            updateStrings[2] = "update quantity";
+        }
+        else {
+            System.out.println("Update type doesn't exist!");
+        }
+
+        return updateStrings;
+    }
+
+    public void addProduct(String productID, int quantity) {
+        System.out.println("PRODUCT: " + productID + "\nQUANTITY: " + quantity);
+        
+    }
 }
