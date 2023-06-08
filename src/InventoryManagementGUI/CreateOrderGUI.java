@@ -53,6 +53,7 @@ public class CreateOrderGUI {
 
         // Add the Confirm Order button
         leftPanel.add(confirmButton, gbc);
+
         // Add the Order History button
         leftPanel.add(orderHistoryButton, gbc);
 
@@ -63,12 +64,8 @@ public class CreateOrderGUI {
         // Add the Back to Main Menu button
         leftPanel.add(goBackButton, gbc);
 
-        GridBagConstraints gbc2 = new GridBagConstraints();
-        gbc2.gridwidth = GridBagConstraints.REMAINDER;
-        gbc2.insets = new Insets(10, 10, 0, 10); // Adjust spacing between buttons
-
         // Add the Exit button
-        leftPanel.add(exitButton, gbc2);
+        leftPanel.add(exitButton, gbc);
 
         contentPanel.add(leftPanel, BorderLayout.WEST);
 

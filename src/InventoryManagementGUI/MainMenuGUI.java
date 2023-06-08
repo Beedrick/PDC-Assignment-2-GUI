@@ -11,6 +11,8 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.BorderFactory;
 import javax.swing.border.Border;
+import java.util.Arrays;
+
 
 public class MainMenuGUI {
 
@@ -34,6 +36,7 @@ public class MainMenuGUI {
     private DatabaseManager databaseManager;
     private JTable inventoryTable;
     private DefaultTableModel inventoryTableModel;
+    private Inventory[] inventoryArray;
 
     public MainMenuGUI(MainMenuController controller) {
         this.controller = controller;
@@ -64,7 +67,7 @@ public class MainMenuGUI {
 
     public void createTable() {
         this.inventoryTableModel = new DefaultTableModel();
-        this.inventoryTableModel.setColumnIdentifiers(new String[]{"Product ID", "Product Number", "Product Brand", "Product Price", "Product Type", "Product Quantity"});
+        this.inventoryTableModel.setColumnIdentifiers(new String[]{"Product Name", "Product Brand", "Product Price", "Product Type", "Product Quantity"});
     }
 
     public JButton createStyledButton(String text, Font font, Color color) {
@@ -130,19 +133,21 @@ public class MainMenuGUI {
         gbc.anchor = GridBagConstraints.WEST; // Left-align the text field
         contentPanel.add(productIDTextField, gbc);
 
-        JLabel quantityLabel = new JLabel(updateStrings[1]);
-        quantityLabel.setFont(new Font("Arial", Font.PLAIN, 18)); // Update font and size
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        gbc.anchor = GridBagConstraints.EAST; // Right-align the label
-        contentPanel.add(quantityLabel, gbc);
+        if(updateType == 1 || updateType == 3) {
+            JLabel quantityLabel = new JLabel(updateStrings[1]);
+            quantityLabel.setFont(new Font("Arial", Font.PLAIN, 18)); // Update font and size
+            gbc.gridx = 0;
+            gbc.gridy = 2;
+            gbc.anchor = GridBagConstraints.EAST; // Right-align the label
+            contentPanel.add(quantityLabel, gbc);
 
-        quantityTextField.setPreferredSize(new Dimension(250, 40));
-        quantityTextField.setFont(new Font("Arial", Font.PLAIN, 18));
-        gbc.gridx = 1;
-        gbc.gridy = 2;
-        gbc.anchor = GridBagConstraints.WEST; // Left-align the text field
-        contentPanel.add(quantityTextField, gbc);
+            quantityTextField.setPreferredSize(new Dimension(250, 40));
+            quantityTextField.setFont(new Font("Arial", Font.PLAIN, 18));
+            gbc.gridx = 1;
+            gbc.gridy = 2;
+            gbc.anchor = GridBagConstraints.WEST; // Left-align the text field
+            contentPanel.add(quantityTextField, gbc);
+        }
 
         // Update confirm button based on updateType
         confirmButton.setText(updateStrings[2]);
@@ -222,13 +227,12 @@ public class MainMenuGUI {
         // Box 1: View Inventory
         viewInventoryButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                Inventory[] inventoryArray = controller.getInventory(); // get current users inventory from DB as an array
+                inventoryArray = controller.getInventory(); // get current users inventory from DB as an array
                 inventoryTableModel.setRowCount(0); // clear inventory table
 
                 // loop through currentUser inventory array
                 for (Inventory item : inventoryArray) {
                     Object[] rowData = new Object[]{
-                        item.getProductID(),
                         item.getProductName(),
                         item.getProductBrand(),
                         item.getProductPrice(),
@@ -241,7 +245,7 @@ public class MainMenuGUI {
                 inventoryTable = new JTable(inventoryTableModel);
                 displayTable(inventoryTable);
 
-                addOrderButtonToPanel();
+                addOrderButtonToPanel(); // allows user to create an order
                 createOrderButton.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
                         // Dispose the current frame
@@ -250,7 +254,6 @@ public class MainMenuGUI {
                         CreateOrderGUI createOrderGUI = new CreateOrderGUI(controller);
                     }
                 });
-
             }
         });
 
@@ -277,6 +280,16 @@ public class MainMenuGUI {
         removeProductButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 displayUpdateInventory(2);
+
+                // confirmButton method for removing product
+                confirmButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        // get values from text fields
+                        String productID = productIDTextField.getText();
+                        controller.removeProduct(productID); // remove product from DB
+                    }
+                });
             }
         });
 

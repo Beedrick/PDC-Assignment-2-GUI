@@ -76,7 +76,6 @@ public class MainMenuController {
 
             while (rs.next()) { // populate inventory objects based on SQL records
                 Inventory inventory = new Inventory(
-                    rs.getString("PRODUCTID"),
                     rs.getString("PRODUCTNAME"),
                     rs.getString("PRODUCTBRAND"),
                     rs.getDouble("PRODUCTPRICE"),
@@ -127,8 +126,8 @@ public class MainMenuController {
         } 
         else if (updateType == 2) {
             updateStrings[0] = "Remove a product from inventory";
-            updateStrings[1] = "Remove quantity: ";
-            updateStrings[2] = "remove product(s)";
+            updateStrings[1] = "NO QUANTITY"; // this string will not be use its just filler to keep consistency
+            updateStrings[2] = "remove product";
         }
         else if (updateType == 3) {
             updateStrings[0] = "Update quantity of product in your inventory";
@@ -142,8 +141,75 @@ public class MainMenuController {
         return updateStrings;
     }
 
-    public void addProduct(String productID, int quantity) {
-        System.out.println("PRODUCT: " + productID + "\nQUANTITY: " + quantity);
-        
+    public void addProduct(String productName, int quantity) {
+    // Add product to DB
+        int currentUserID = getUserID(currentUser);
+
+        try {
+            // Check if the product exists in the inventory for the current user
+            String selectQuery = "SELECT * FROM INVENTORY WHERE USERID = ? AND PRODUCTNAME = ?";
+            PreparedStatement selectStatement = conn.prepareStatement(selectQuery);
+            selectStatement.setInt(1, currentUserID);
+            selectStatement.setString(2, productName);
+            ResultSet rs = selectStatement.executeQuery();
+
+            if (rs.next()) {
+                // Product exists, update the quantity
+                int currentQuantity = rs.getInt("PRODUCTQUANTITY");
+                int updatedQuantity = currentQuantity + quantity;
+
+                String updateQuery = "UPDATE INVENTORY SET PRODUCTQUANTITY = ? WHERE USERID = ? AND PRODUCTNAME = ?";
+                PreparedStatement updateStatement = conn.prepareStatement(updateQuery);
+                updateStatement.setInt(1, updatedQuantity);
+                updateStatement.setInt(2, currentUserID);
+                updateStatement.setString(3, productName);
+                updateStatement.executeUpdate();
+
+                System.out.println("Quantity updated successfully.");
+            } else {
+                // Product doesn't exist, insert a new row
+                String insertQuery = "INSERT INTO INVENTORY (USERID, PRODUCTNAME, PRODUCTQUANTITY) VALUES (?, ?, ?)";
+                PreparedStatement insertStatement = conn.prepareStatement(insertQuery);
+                insertStatement.setInt(1, currentUserID);
+                insertStatement.setString(2, productName);
+                insertStatement.setInt(3, quantity);
+                insertStatement.executeUpdate();
+
+                System.out.println("New product added to inventory.");
+            }
+
+            selectStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void removeProduct(String productName) {
+    // Remove product to DB
+        int currentUserID = getUserID(currentUser);
+
+        try {
+            // Check if the product exists in the inventory for the current user
+            String selectQuery = "SELECT * FROM inventory WHERE UserID = ? AND ProductName = ?";
+            PreparedStatement selectStatement = conn.prepareStatement(selectQuery);
+            selectStatement.setInt(1, currentUserID);
+            selectStatement.setString(2, productName);
+            ResultSet rs = selectStatement.executeQuery();
+
+            if (rs.next()) {
+                // Product exists, delete the row
+                String deleteQuery = "DELETE FROM inventory WHERE UserID = ? AND ProductName = ?";
+                PreparedStatement deleteStatement = conn.prepareStatement(deleteQuery);
+                deleteStatement.setInt(1, currentUserID);
+                deleteStatement.setString(2, productName);
+                deleteStatement.executeUpdate();
+
+                System.out.println("Product removed from inventory.");
+            } else {
+                System.out.println("Product not found in inventory for the current user.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

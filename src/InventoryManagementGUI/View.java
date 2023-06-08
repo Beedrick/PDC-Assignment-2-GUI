@@ -24,6 +24,7 @@ public class View {
                 // Set the LoginGUI as the view in the controller
                 controller.setView(loginGUI);
             }
+            
         });
 
     }
