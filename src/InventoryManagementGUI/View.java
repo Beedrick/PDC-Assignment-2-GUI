@@ -16,6 +16,7 @@ public class View {
         dB.createAccountsTable();
         dB.createCarProductCatalogueTable();
         dB.createUserInventoryTable();
+        dB.createOrderInventory();
         
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
