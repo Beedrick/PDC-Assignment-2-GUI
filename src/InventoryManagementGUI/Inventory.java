@@ -1,24 +1,18 @@
 package InventoryManagementGUI;
 
 public class Inventory {
-    private String productID;
     private String productName;
     private String productBrand;
     private double productPrice;
     private String productType;
     private int productQuantity;
 
-    public Inventory(String productID, String productName, String productBrand, double productPrice, String productType, int productQuantity) {
-        this.productID = productID;
+    public Inventory(String productName, String productBrand, double productPrice, String productType, int productQuantity) {
         this.productName = productName;
         this.productBrand = productBrand;
         this.productPrice = productPrice;
         this.productType = productType;
         this.productQuantity = productQuantity;
-    }
-
-    public String getProductID() {
-        return productID;
     }
 
     public String getProductName() {
