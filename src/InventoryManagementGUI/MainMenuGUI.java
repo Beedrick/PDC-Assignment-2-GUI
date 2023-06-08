@@ -13,6 +13,7 @@ import javax.swing.BorderFactory;
 import javax.swing.border.Border;
 
 public class MainMenuGUI {
+
     private MainMenuController controller;
     private Font buttonFont;
     private Color buttonColor;
@@ -22,6 +23,7 @@ public class MainMenuGUI {
     private JButton exitButton;
     private JButton viewCarProductsButton;
     private JButton addProductButton;
+    private JButton createOrderButton;
     private JButton removeProductButton;
     private JButton updateQuantityButton;
     private JTextField productIDTextField;
@@ -49,7 +51,10 @@ public class MainMenuGUI {
         this.productIDTextField = new JTextField();
         this.quantityTextField = new JTextField();
         this.confirmButton = new JButton("");
-        
+
+        createOrderButton = createStyledButton("Create Order", buttonFont, buttonColor);
+        createOrderButton.setVisible(false);
+
         createTable();
         setFrame();
         setSidePanel();
@@ -61,9 +66,9 @@ public class MainMenuGUI {
         this.inventoryTableModel = new DefaultTableModel();
         this.inventoryTableModel.setColumnIdentifiers(new String[]{"Product ID", "Product Number", "Product Brand", "Product Price", "Product Type", "Product Quantity"});
     }
-    
+
     public JButton createStyledButton(String text, Font font, Color color) {
-    // Helper method to create styled buttons
+        // Helper method to create styled buttons
         JButton button = new JButton(text);
         button.setFont(font);
         button.setBackground(color);
@@ -74,7 +79,7 @@ public class MainMenuGUI {
     }
 
     public void addToSidePanel(JPanel sidePanel, Component component, int gridx, int gridy) {
-    // Helper method to add components to the side panel with GridBagLayout
+        // Helper method to add components to the side panel with GridBagLayout
         constraints.gridx = gridx;
         constraints.gridy = gridy;
         constraints.anchor = GridBagConstraints.NORTHWEST;
@@ -84,7 +89,7 @@ public class MainMenuGUI {
     }
 
     public void displayUpdateInventory(int updateType) {
-    /* Updates the panel to display content for user to update their inventory
+        /* Updates the panel to display content for user to update their inventory
         UPDATE TYPES:
             1) Add a product
             2) Remove a product
@@ -142,13 +147,11 @@ public class MainMenuGUI {
         // Update confirm button based on updateType
         confirmButton.setText(updateStrings[2]);
         confirmButton.setFont(new Font("Arial", Font.BOLD, 18)); // Update font and size
-        if(updateType == 1) { 
+        if (updateType == 1) {
             confirmButton.setBackground(new Color(0, 150, 0)); // Darker green color
-        }
-        else if (updateType == 2) {
+        } else if (updateType == 2) {
             confirmButton.setBackground(Color.RED); // Red color
-        }
-        else if (updateType == 3) {
+        } else if (updateType == 3) {
             confirmButton.setBackground(Color.BLUE); // Blue color
         }
 
@@ -167,7 +170,15 @@ public class MainMenuGUI {
     }
 
     public void displayTable(JTable table) {
-    // Update the displayTable method to accept a JTable parameter
+
+        //Displays the create order button if and only if there is a table of inventory to display
+        if (table != null) {
+            createOrderButton.setVisible(true);
+        } else {
+            createOrderButton.setVisible(false);
+        }
+
+        // Update the displayTable method to accept a JTable parameter
         contentPanel.removeAll(); // Clear previous content
 
         // Create a scrollable pane for the table
@@ -189,21 +200,22 @@ public class MainMenuGUI {
     public void setFrame() {
         frame.setSize(1400, 900);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                
+
         frame.add(sidePanel, BorderLayout.WEST);
     }
 
     public void setSidePanel() {
         sidePanel.setBackground(new Color(40, 44, 52));
         sidePanel.setLayout(new GridBagLayout());
-        
+
         // Add side panel contents
         addToSidePanel(sidePanel, viewInventoryButton, 0, 0);
         addToSidePanel(sidePanel, addProductButton, 0, 1);
         addToSidePanel(sidePanel, removeProductButton, 0, 2);
         addToSidePanel(sidePanel, updateQuantityButton, 0, 3);
         addToSidePanel(sidePanel, viewCarProductsButton, 0, 4);
-        addToSidePanel(sidePanel, exitButton, 0, 5);
+        addToSidePanel(sidePanel, createOrderButton, 0, 5);
+        addToSidePanel(sidePanel, exitButton, 0, 6);
     }
 
     public void setButtons() {
@@ -228,6 +240,17 @@ public class MainMenuGUI {
 
                 inventoryTable = new JTable(inventoryTableModel);
                 displayTable(inventoryTable);
+
+                addOrderButtonToPanel();
+                createOrderButton.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        // Dispose the current frame
+                        frame.dispose();
+                        // Create a new CreateOrderGUI window
+                        CreateOrderGUI createOrderGUI = new CreateOrderGUI(controller.getCurrentUser());
+                    }
+                });
+
             }
         });
 
@@ -235,17 +258,17 @@ public class MainMenuGUI {
         addProductButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 displayUpdateInventory(1);
-                
+
                 // confirmButton method for adding product
                 confirmButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    // get values from text fields
-                    String productID = productIDTextField.getText();
-                    String quantityText = quantityTextField.getText();
-                    int quantity = Integer.parseInt(quantityText);
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        // get values from text fields
+                        String productID = productIDTextField.getText();
+                        String quantityText = quantityTextField.getText();
+                        int quantity = Integer.parseInt(quantityText);
 
-                    controller.addProduct(productID, quantity); // add product to DB
+                        controller.addProduct(productID, quantity); // add product to DB
                     }
                 });
             }
@@ -255,14 +278,14 @@ public class MainMenuGUI {
             public void actionPerformed(ActionEvent e) {
                 displayUpdateInventory(2);
             }
-        }); 
+        });
 
         // Box 4: Update quantity of a product button
         updateQuantityButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 displayUpdateInventory(3);
             }
-        }); 
+        });
 
         // Box 5: viewCarProducts Button
         viewCarProductsButton.addActionListener(new ActionListener() {
@@ -306,6 +329,32 @@ public class MainMenuGUI {
                 System.exit(0); // Exit the program with a status code of 0
             }
         });
+    }
+
+    private void addOrderButtonToPanel() {
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setBackground(Color.WHITE);
+        buttonPanel.setLayout(new BorderLayout());
+
+        // Create a panel for vertical spacing
+        JPanel spacerPanel = new JPanel();
+        spacerPanel.setBackground(Color.WHITE);
+        spacerPanel.setPreferredSize(new Dimension(10, 40));
+        buttonPanel.add(spacerPanel, BorderLayout.NORTH); // Add the spacer panel to the top
+
+        JPanel orderButtonPanel = new JPanel();
+        orderButtonPanel.setBackground(Color.WHITE);
+        orderButtonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+
+        // Add the order button to the orderButtonPanel
+        orderButtonPanel.add(createOrderButton);
+
+        // Add the orderButtonPanel to the buttonPanel
+        buttonPanel.add(orderButtonPanel, BorderLayout.CENTER);
+
+        contentPanel.add(buttonPanel, BorderLayout.SOUTH);
+        contentPanel.revalidate();
+        contentPanel.repaint();
     }
 
     public void displayFrame() {
