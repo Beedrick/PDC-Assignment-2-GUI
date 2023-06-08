@@ -18,9 +18,10 @@ public class MainMenuGUI {
     private JPanel sidePanel;
     private JButton viewInventoryButton;
     private JButton exitButton;
-    private JButton additionalButton1;
-    private JButton additionalButton2;
-    private JButton additionalButton3;
+    private JButton viewCarProductsButton;
+    private JButton addProductButton;
+    private JButton removeProductButton;
+    private JButton updateQuantityButton;
     private GridBagConstraints constraints;
     private static JPanel contentPanel; // Panel to display contents
     private DatabaseManager databaseManager;
@@ -35,10 +36,11 @@ public class MainMenuGUI {
         this.sidePanel = new JPanel();
         this.constraints = new GridBagConstraints();
         this.viewInventoryButton = createStyledButton("View Inventory", buttonFont, buttonColor);
+        this.viewCarProductsButton = createStyledButton("Car Products Catalogue", buttonFont, buttonColor);
+        this.addProductButton = createStyledButton("Add Product", buttonFont, buttonColor);
+        this.removeProductButton = createStyledButton("Remove Product", buttonFont, buttonColor);
+        this.updateQuantityButton = createStyledButton("Update Quantity", buttonFont, buttonColor);
         this.exitButton = createStyledButton("Exit", buttonFont, buttonColor);
-        this.additionalButton1 = createStyledButton("Car Products Catalogue", buttonFont, buttonColor);
-        this.additionalButton2 = createStyledButton("Button 2", buttonFont, buttonColor);
-        this.additionalButton3 = createStyledButton("Button 3", buttonFont, buttonColor);
         
         createTable();
         setFrame();
@@ -72,9 +74,16 @@ public class MainMenuGUI {
         constraints.fill = GridBagConstraints.HORIZONTAL;
         sidePanel.add(component, constraints);
     }
+    
+    public void displayUpdateInventory() {
+    // Updates the panel to allow user to input info to add/remove products
+        contentPanel.removeAll(); // Clear previous content
+        
+        JLabel updateLabel = new JLabel("Add a product");
+    }
 
-    public void displayContent(JTable table) {
-    // Update the displayContent method to accept a JTable parameter
+    public void displayTable(JTable table) {
+    // Update the displayTable method to accept a JTable parameter
         contentPanel.removeAll(); // Clear previous content
 
         // Create a scrollable pane for the table
@@ -106,10 +115,11 @@ public class MainMenuGUI {
         
         // Add side panel contents
         addToSidePanel(sidePanel, viewInventoryButton, 0, 0);
-        addToSidePanel(sidePanel, exitButton, 0, 1);
-        addToSidePanel(sidePanel, additionalButton1, 0, 2);
-        addToSidePanel(sidePanel, additionalButton2, 0, 3);
-        addToSidePanel(sidePanel, additionalButton3, 0, 4);
+        addToSidePanel(sidePanel, addProductButton, 0, 1);
+        addToSidePanel(sidePanel, removeProductButton, 0, 2);
+        addToSidePanel(sidePanel, updateQuantityButton, 0, 3);
+        addToSidePanel(sidePanel, viewCarProductsButton, 0, 4);
+        addToSidePanel(sidePanel, exitButton, 0, 5);
     }
 
     public void setButtons() {
@@ -133,17 +143,33 @@ public class MainMenuGUI {
                 }
 
                 inventoryTable = new JTable(inventoryTableModel);
-                displayContent(inventoryTable);
+                displayTable(inventoryTable);
             }
         });
-        // Box 2: Exit Program
-        exitButton.addActionListener(new ActionListener() {
+
+        // Box 2: Additional Button 2
+        addProductButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                System.exit(0); // Exit the program with a status code of 0
+                
+                displayUpdateInventory();
             }
         });
-        // Box 3: Additional Button 1
-        additionalButton1.addActionListener(new ActionListener() {
+        // Box 3: Additional Button 3
+        removeProductButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Action for Button 3 to be set
+            }
+        }); 
+
+        // Box 4: Additional Button 3
+        updateQuantityButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Action for Button 3 to be set
+            }
+        }); 
+
+        // Box 5: viewCarProducts Button
+        viewCarProductsButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 databaseManager = new DatabaseManager();
 
@@ -174,21 +200,16 @@ public class MainMenuGUI {
 
                 JTable carCatalogueTable = new JTable(tableModel); // Create a table using the table model
                 //customizeTable(carCatalogueTable);
-                displayContent(carCatalogueTable); // Display the table in full screen
+                displayTable(carCatalogueTable); // Display the table in full screen
             }
         });
-        // Box 4: Additional Button 2
-        additionalButton2.addActionListener(new ActionListener() {
+
+        // Box 6: Exit Program
+        exitButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // Action for Button 2 to be set
+                System.exit(0); // Exit the program with a status code of 0
             }
         });
-        // Box 5: Additional Button 3
-        additionalButton3.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                // Action for Button 3 to be set
-            }
-        }); 
     }
 
     public void displayFrame() {
