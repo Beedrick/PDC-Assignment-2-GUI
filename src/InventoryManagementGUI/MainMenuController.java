@@ -26,6 +26,10 @@ public class MainMenuController {
     public void setView(MainMenuGUI view) {
         this.view = view;
     }
+    
+    public String getCurrentUser(){
+        return this.currentUser;
+    }
 
     public void setCurrentUser(String currentUsername) {
         this.currentUser = currentUsername;

@@ -121,8 +121,8 @@ public class DatabaseManager {
             }
         }
     }
-    
-     public void createCarProductCatalogueTable() {
+
+    public void createCarProductCatalogueTable() {
         try (Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD)) {
             try (Statement statement = conn.createStatement()) {
                 String createTableSQL = "CREATE TABLE CARPRODUCTCATALOGUE("
@@ -131,6 +131,31 @@ public class DatabaseManager {
                         + "PRODUCTBRAND VARCHAR(50) NOT NULL, "
                         + "PRODUCTPRICE DOUBLE NOT NULL, "
                         + "PRODUCTTYPE VARCHAR(50) NOT NULL"
+                        + ")";
+                statement.executeUpdate(createTableSQL);
+                System.out.println("User Inventory Table created successfully.");
+            }
+        } catch (SQLException e) {
+            if (e.getSQLState().equals("X0Y32")) {
+                // X0Y32 is the SQL state for table already exists exception in Apache Derby
+                System.out.println("Table already exists.");
+            } else {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void createOrderInventory() {
+        try (Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD)) {
+            try (Statement statement = conn.createStatement()) {
+                String createTableSQL = "CREATE TABLE ODERINVENTORY("
+                        + "USERID INT NOT NULL, "
+                        + "PRODUCTID VARCHAR(50) NOT NULL, "
+                        + "PRODUCTNAME VARCHAR(50) NOT NULL, "
+                        + "PRODUCTBRAND VARCHAR(50) NOT NULL, "
+                        + "PRODUCTPRICE DOUBLE NOT NULL, "
+                        + "PRODUCTTYPE VARCHAR(50) NOT NULL, "
+                        + "PRODUCTQUANTITY INTEGER NOT NULL"
                         + ")";
                 statement.executeUpdate(createTableSQL);
                 System.out.println("User Inventory Table created successfully.");
