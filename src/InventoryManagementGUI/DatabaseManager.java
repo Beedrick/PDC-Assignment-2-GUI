@@ -148,7 +148,6 @@ public class DatabaseManager {
             try (Statement statement = conn.createStatement()) {
                 String createTableSQL = "CREATE TABLE ODERINVENTORY("
                         + "USERID INT NOT NULL, "
-                        + "PRODUCTID VARCHAR(50) NOT NULL, "
                         + "PRODUCTNAME VARCHAR(50) NOT NULL, "
                         + "PRODUCTBRAND VARCHAR(50) NOT NULL, "
                         + "PRODUCTPRICE DOUBLE NOT NULL, "
