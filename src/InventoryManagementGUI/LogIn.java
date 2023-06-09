@@ -5,7 +5,6 @@ package InventoryManagementGUI;
  * @author rocco + beedrix
  */
 
-
 public class LogIn {
     private String username;
     private String password;

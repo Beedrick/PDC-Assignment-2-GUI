@@ -189,6 +189,7 @@ public class MainMenuGUI {
         // Displays panel contents relative to adding a product into the user's inventory
         addProductMenuButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                carCatalogueDisplayed = false;
                 // Enable/disable buttons
                 addProductButton.setEnabled(true);
                 removeProductButton.setEnabled(false);
@@ -220,8 +221,10 @@ public class MainMenuGUI {
     public void openRemoveProductPanel() {
         // Displays panel contents relative to removing a product from the user's inventory
         removeProductMenuButton.addActionListener(new ActionListener() {
+
             public void actionPerformed(ActionEvent e) {
                 // Enable/disable buttons
+                carCatalogueDisplayed = false;
                 addProductButton.setEnabled(false);
                 removeProductButton.setEnabled(true);
                 updateQuantityButton.setEnabled(false);
@@ -250,6 +253,7 @@ public class MainMenuGUI {
         // Displays panel contents relative to updating a product's quantity in the user's inventory
         updateQuantityMenuButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                carCatalogueDisplayed = false;
                 // Enable/disable buttons
                 addProductButton.setEnabled(false);
                 removeProductButton.setEnabled(false);
@@ -283,13 +287,14 @@ public class MainMenuGUI {
         if (viewCarProductsButton.getActionListeners().length == 0) {
 
             viewCarProductsButton.addActionListener(new ActionListener() {
+
                 public void actionPerformed(ActionEvent e) {
                     // Enable/disable buttons so nothing is accidentally clicked
                     addProductButton.setEnabled(false);
                     removeProductButton.setEnabled(false);
                     updateQuantityButton.setEnabled(false);
 
-                    if (!carCatalogueDisplayed) {
+                        carCatalogueTableModel.setRowCount(0);
                         carCatalogueArray = controller.getCarCatalogue(); // retrieve car catalogue records from DB and store in array
 
                         for (CarCatalogue item : carCatalogueArray) { // loop through car catalogue array
@@ -305,7 +310,7 @@ public class MainMenuGUI {
                         carCatalogueTable = new JTable(carCatalogueTableModel);
                         displayTable(carCatalogueTable);
                         carCatalogueDisplayed = true;
-                    }
+                    
                 }
             });
         }

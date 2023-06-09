@@ -17,7 +17,6 @@ public class InventoryApp {
         dB.createCarProductCatalogueTable();
         dB.createUserInventoryTable();
         dB.createOrderInventory();
-        
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 LoginController controller = new LoginController();

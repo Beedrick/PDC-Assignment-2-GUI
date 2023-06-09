@@ -4,7 +4,6 @@ package InventoryManagementGUI;
  *
  * @author rocco + beedrix
  */
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -34,21 +33,23 @@ public class CreateOrderGUI {
     private JButton orderHistoryButton;
     private JButton goBackButton;
     private JButton exitButton;
-    private JButton downloadReceiptButton;
     // inventory table
     private JTable inventoryTable;
     private DefaultTableModel inventoryTableModel;
     private CreateOrder[] inventoryArray;
     // car catalogue table
     private static int orderID = 1;
+    private CreateOrder[] storedInven;
 
     public CreateOrderGUI(MainMenuController currUser) {
+
         this.controller = new CreateOrderController();
         this.currUser = currUser;
         frame = new JFrame("Create Order");
         contentPanel = new JPanel();
         contentPanel.setLayout(new BorderLayout());
         this.controller.setCurrentUser(currUser.getCurrentUser());
+        storedInven = controller.getInventory();
 
         createTables();
         setOrderButtonStyle();
@@ -96,8 +97,6 @@ public class CreateOrderGUI {
 // Create a new panel for the button and set its layout
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
-// Add the Download Receipt button to the button panel
-        buttonPanel.add(downloadReceiptButton);
 // Add the button panel to the content panel at the bottom
         contentPanel.add(buttonPanel, BorderLayout.SOUTH);
         gbc.insets = new Insets(10, 10, 10, 10); // Adjust spacing between buttons
@@ -120,7 +119,7 @@ public class CreateOrderGUI {
         tablePanel.add(scrollPane, BorderLayout.CENTER);
         // Add the table panel to the content panel
         contentPanel.add(tablePanel, BorderLayout.CENTER);
-        openInventoryPanel();
+        displayTable(openInventoryPanel());
 
     }
 
@@ -135,24 +134,15 @@ public class CreateOrderGUI {
                     // Insert data from the table into the ORDERINVENTORY table
                     insertDataIntoOrderInventory();
 
+                    storedInven = controller.getInventory();
+
                     // Remove user's inventory from the INVENTORY table
-                    removeUserInventory();
+                    controller.removeUserInventory(currUser);
 
                     // Increment order ID for the next order
                     orderID++;
 
-                    // Set downloadReceiptButton visible after order confirmation
-                    downloadReceiptButton.setVisible(true);
                 }
-            }
-        });
-    }
-
-    //Setting action listeners for download receipt Button
-    public void downloadButton() {
-        downloadReceiptButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                downloadReceipt();
             }
         });
     }
@@ -189,9 +179,6 @@ public class CreateOrderGUI {
         this.orderHistoryButton = createStyledButton("Order History", buttonFont, buttonColor);
         this.goBackButton = createStyledButton("Back to Main Menu", buttonFont, buttonColor);
         this.exitButton = createStyledButton("Exit", buttonFont, buttonColor);
-        downloadReceiptButton = createStyledButton("Download Receipt", buttonFont, buttonColor);
-        downloadReceiptButton.setVisible(false); // Set downloadReceiptButton initially invisible
-
     }
 
     //sets formatting and color for button style
@@ -205,7 +192,6 @@ public class CreateOrderGUI {
     public void setOrderButtons() {
         goBack();
         exitButton();
-        downloadButton();
         historyButton();
         confirmButton();
     }
@@ -301,7 +287,7 @@ public class CreateOrderGUI {
         return model;
     }
 
-    public void openInventoryPanel() {
+    public JTable openInventoryPanel() {
 
         inventoryArray = controller.getInventory(); // get current users inventory from DB as an inventory obj array
         inventoryTableModel.setRowCount(0); // clear inventory table
@@ -320,7 +306,29 @@ public class CreateOrderGUI {
 
         // turn table model into table and display users current inventory
         inventoryTable = new JTable(inventoryTableModel);
-        displayTable(inventoryTable);
+
+        return inventoryTable;
+
+    }
+
+    public JTable recieptArray() {
+
+        inventoryTableModel.setRowCount(0); // clear inventory table
+
+        // loop through currentUser inventory array
+        for (CreateOrder item : this.storedInven) {
+            Object[] rowData = new Object[]{
+                item.getProductName(),
+                item.getProductBrand(),
+                item.getProductPrice(),
+                item.getProductType(),
+                item.getProductQuantity()
+            };
+            inventoryTableModel.addRow(rowData); // add current obj to corresponding row
+        }
+
+        // turn table model into table and display users current inventory
+        return new JTable(inventoryTableModel);
 
     }
 
@@ -328,12 +336,15 @@ public class CreateOrderGUI {
 
         // Create a scrollable pane for the table
         JScrollPane scrollPane = new JScrollPane(table);
-     
+
         contentPanel.add(scrollPane, BorderLayout.CENTER);
     }
 
     public void downloadReceipt() {
         try {
+
+            JTable recieptTable = recieptArray();
+
             String filename = "receipt.txt";
             FileWriter writer = new FileWriter(filename);
             writer.write("=================================\n");
@@ -341,23 +352,25 @@ public class CreateOrderGUI {
             writer.write("=================================\n");
             writer.write("User ID: " + currUser.getUserID(currUser.getCurrentUser()) + "\n");
 
-            int[] columnWidths = {15, 15, 10, 10}; // Widths for Product, Brand, Price, and Quantity columns
+            int[] columnWidths = {15, 15, 10, 10, 10};
 
             // Create the header line with flexible border formatting
             writer.write(createHeaderLine(columnWidths));
 
             double total = 0;
 
-            for (int i = 0; i < table.getRowCount(); i++) {
-                String productName = (String) table.getValueAt(i, 1);
-                String brand = (String) table.getValueAt(i, 2);
-                double price = (double) table.getValueAt(i, 3);
-                int quantity = (int) table.getValueAt(i, 5);
+            for (int i = 0; i < recieptTable.getRowCount(); i++) {
+                String productName = (String) recieptTable.getValueAt(i, 1);
+                String brand = (String) recieptTable.getValueAt(i, 2);
+                double price = (double) recieptTable.getValueAt(i, 3);
+                String prodType = (String) recieptTable.getValueAt(i, 4);
+                int quantity = (int) recieptTable.getValueAt(i, 5);
 
                 writer.write(formatField(productName, columnWidths[0]) + "\t");
                 writer.write(formatField(brand, columnWidths[1]) + "\t");
                 writer.write(formatField(String.format("$%.2f", price), columnWidths[2]) + "\t");
-                writer.write(formatField(Integer.toString(quantity), columnWidths[3]) + "\n");
+                writer.write(formatField(prodType, columnWidths[3]) + "\t");
+                writer.write(formatField(Integer.toString(quantity), columnWidths[4]) + "\n");
 
                 total += price * quantity;
             }
@@ -452,29 +465,6 @@ public class CreateOrderGUI {
         }
 
         return orderID;
-    }
-
-    private void removeUserInventory() {
-        // JDBC database connection details
-        String url = "jdbc:derby:InventoryDB1;";
-        String username = "gui";
-        String password = "gui";
-
-        try (Connection connection = DriverManager.getConnection(url, username, password)) {
-            // Prepare the SQL statement to delete rows from the INVENTORY table
-            String deleteQuery = "DELETE FROM INVENTORY WHERE USERID = ?";
-            PreparedStatement statement = connection.prepareStatement(deleteQuery);
-            statement.setInt(1, currUser.getUserID(currUser.getCurrentUser())); // Set the user ID
-
-            // Execute the delete statement
-            statement.executeUpdate();
-
-            // Close the statement
-            statement.close();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
     public void createTables() {

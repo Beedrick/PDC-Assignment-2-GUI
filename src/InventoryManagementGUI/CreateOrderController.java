@@ -6,6 +6,7 @@ package InventoryManagementGUI;
  */
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -105,4 +106,27 @@ public class CreateOrderController {
         return rowCount;
     }
 
+        public void removeUserInventory(MainMenuController currUser) {
+        // JDBC database connection details
+        String url = "jdbc:derby:InventoryDB1;";
+        String username = "gui";
+        String password = "gui";
+
+        try (Connection connection = DriverManager.getConnection(url, username, password)) {
+            // Prepare the SQL statement to delete rows from the INVENTORY table
+            String deleteQuery = "DELETE FROM INVENTORY WHERE USERID = ?";
+            PreparedStatement statement = connection.prepareStatement(deleteQuery);
+            statement.setInt(1, currUser.getUserID(currUser.getCurrentUser())); // Set the user ID
+
+            // Execute the delete statement
+            statement.executeUpdate();
+
+            // Close the statement
+            statement.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
 }
