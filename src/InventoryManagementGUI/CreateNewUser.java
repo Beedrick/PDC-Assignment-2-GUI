@@ -2,8 +2,9 @@ package InventoryManagementGUI;
 
 /**
  *
- * @author Gorilla Rig
+ * @author rocco + beedrix
  */
+
 public class CreateNewUser {
     private int userID;
     private String username;

@@ -15,6 +15,7 @@ public class LoginController {
     public static Connection conn;
 
     public LoginController() {
+        this.popupWindow = new PopupWindow();
         DatabaseManager dbManager = new DatabaseManager();
         this.conn = dbManager.getConnection();
         this.model = new LogIn();
@@ -43,12 +44,14 @@ public class LoginController {
             return valid;
         } catch (SQLException e) {
             e.printStackTrace();
+            // Handle the exception or print an error message
         } finally {
             if (rs != null) {
                 try {
                     rs.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
+                    // Handle the exception or print an error message
                 }
             }
         }
@@ -65,7 +68,7 @@ public class LoginController {
             closeWindow = true;
         } else {
             view.resetTextFields();
-            popupWindow = new PopupWindow("Invalid login", "Your username or password is incorrect. \nPlease try again.");
+            popupWindow.displayPopup("Invalid login", "Your username or password is incorrect. \nPlease try again.");
         }
 
         return closeWindow;

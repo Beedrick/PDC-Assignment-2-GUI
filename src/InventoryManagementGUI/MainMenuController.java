@@ -5,7 +5,6 @@ package InventoryManagementGUI;
  * @author rocco + beedrix
  */
 import java.sql.*;
-import java.sql.ResultSetMetaData;
 import javax.swing.JOptionPane;
 
 public class MainMenuController {
@@ -14,12 +13,13 @@ public class MainMenuController {
     private MainMenuGUI view;
     private PopupWindow popupWindow;
     private Inventory[] inventoryArray;
+    private CarCatalogue[] carCatalogueArray;
     public static Connection conn;
 
     public MainMenuController() {
         DatabaseManager dbManager = new DatabaseManager();
         this.conn = dbManager.getConnection();
-        //this.model = new Inventory();
+        this.popupWindow = new PopupWindow();
     }
 
     public void setView(MainMenuGUI view) {
@@ -55,10 +55,60 @@ public class MainMenuController {
         return userID;
     }
 
+    public CarCatalogue[] getCarCatalogue() {
+        // Returns the car catalogue from DB as a Car Catalogue array
+        int index = 0;
+        ResultSet rs = null;
+        PreparedStatement pstmt = null;
+
+        try {
+            String query = "SELECT * FROM CARPRODUCTCATALOGUE";
+            pstmt = conn.prepareStatement(query);
+            ResultSet rsCountCatalogue = pstmt.executeQuery(); // to count car catalogue size
+
+            int rowCount = getInventorySize(rsCountCatalogue);
+            rs = pstmt.executeQuery();
+            carCatalogueArray = new CarCatalogue[rowCount];
+
+            while (rs.next()) { // populate inventory objects based on SQL records
+                CarCatalogue catalogue = new CarCatalogue(
+                        rs.getString("PRODUCTNAME"),
+                        rs.getString("PRODUCTBRAND"),
+                        rs.getDouble("PRODUCTPRICE"),
+                        rs.getString("PRODUCTTYPE")
+                );
+                carCatalogueArray[index] = catalogue;
+                index++;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return carCatalogueArray;
+    }
+
+    public int getCarCatalogueSize(ResultSet rsCountCatalogue) {
+        // Return size of car catalogue so that can create an Car catalogue array with correct size
+        int rowCount = 0;
+
+        try {
+            while (rsCountCatalogue.next()) {
+                rowCount++;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace(); // Handle the exception or print an error message
+        } finally {
+            try {
+                rsCountCatalogue.close();
+            } catch (SQLException e) {
+                e.printStackTrace(); // Handle the exception or print an error message
+            }
+        }
+        return rowCount;
+    }
+
     public Inventory[] getInventory() {
         // Returns current users inventory from DB as an Inventory array
         int currentUserID = getUserID(currentUser); // Get userID to get inventory
-        System.out.println("UserID: " + currentUserID);
         int index = 0;
         ResultSet rs = null;
         PreparedStatement pstmt = null;
@@ -67,9 +117,9 @@ public class MainMenuController {
             String query = "SELECT * FROM INVENTORY WHERE USERID = ?";
             pstmt = conn.prepareStatement(query);
             pstmt.setInt(1, currentUserID);
-            ResultSet rsCount = pstmt.executeQuery(); // to count inventory size
+            ResultSet rsCountInventory = pstmt.executeQuery(); // to count inventory size
 
-            int rowCount = getInventorySize(rsCount);
+            int rowCount = getInventorySize(rsCountInventory);
             rs = pstmt.executeQuery();
             inventoryArray = new Inventory[rowCount];
 
@@ -87,50 +137,44 @@ public class MainMenuController {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         return inventoryArray;
     }
 
-    public int getInventorySize(ResultSet rsCount) {
+    public int getInventorySize(ResultSet rsCountInventory) {
         // Return size of users inventory so that can create an Inventory array with correct size
         int rowCount = 0;
 
         try {
-            while (rsCount.next()) {
+            while (rsCountInventory.next()) {
                 rowCount++;
             }
         } catch (SQLException e) {
-            // Handle the exception or print an error message
-            e.printStackTrace();
+            e.printStackTrace(); // Handle the exception or print an error message
         } finally {
             try {
-                rsCount.close();
+                rsCountInventory.close();
             } catch (SQLException e) {
-                // Handle the exception or print an error message
-                e.printStackTrace();
+                e.printStackTrace(); // Handle the exception or print an error message
             }
         }
-
         return rowCount;
     }
 
     public String[] getUpdateStrings(int updateType) {
         // Returns array of strings to update the GUI for either add product/remove product/update quantity
-        String[] updateStrings = new String[3];
+        String[] updateStrings = new String[2];
 
         if (updateType == 1) {
             updateStrings[0] = "    Add a product to inventory";
             updateStrings[1] = "Add quantity: ";
-            updateStrings[2] = "add product(s)";
         } else if (updateType == 2) {
             updateStrings[0] = "Remove a product from inventory";
-            updateStrings[1] = "NO QUANTITY"; // this string will not be use its just filler to keep consistency
-            updateStrings[2] = "remove product";
+            updateStrings[1] = ""; // this string will not be used its just filler to keep consistency
         } else if (updateType == 3) {
             updateStrings[0] = "Update quantity of product in your inventory";
             updateStrings[1] = "Update quantity: ";
-            updateStrings[2] = "update quantity";
         } else {
+            updateStrings = null;
             System.out.println("Update type doesn't exist!");
         }
 
@@ -144,7 +188,8 @@ public class MainMenuController {
         // Check if the quantity is negative
         if (quantity < 0) {
             String errorMessage = "Invalid quantity. Quantity cannot be negative.";
-            JOptionPane.showMessageDialog(null, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);
+
+            popupWindow.displayPopup("Error", errorMessage);
             return;
         }
 
@@ -275,4 +320,120 @@ public class MainMenuController {
         }
     }
 
+    public boolean verifyAddingInput(String productID, String quantityText) {
+        // Checks if the users input is valid for updating product
+        int currentUserID = getUserID(currentUser);
+        //boolean verified = false;
+        ResultSet rs = null;
+        PreparedStatement pstmt = null;
+
+        if (!productID.isEmpty() && !quantityText.isEmpty()) {
+            if (isInteger(quantityText)) {
+                try {
+                    String query = "SELECT PRODUCTNAME FROM INVENTORY WHERE PRODUCTNAME = ? AND USERID = ?";
+                    pstmt = conn.prepareStatement(query);
+                    pstmt.setString(1, productID);
+                    pstmt.setInt(2, currentUserID);
+                    rs = pstmt.executeQuery(); // get product name
+
+                    if (rs.next()) { // matching product name found
+                        popupWindow.displayPopup("Error: invalid input!", "This product is already in your inventory");
+                    } else {
+                        return true;
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                popupWindow.displayPopup("Error: invalid input!", "Please enter a valid interger for quantity");
+                return false;
+            }
+        } else {
+            popupWindow.displayPopup("Error: invalid input!", "Please enter a valid product name and/or product quantity");
+            return false;
+        }
+
+        return false;
+    }
+
+    public boolean verifyRemovingInput(String productID) {
+        // Checks if the users input is valid for adding a product
+        int currentUserID = getUserID(currentUser);
+        ResultSet rs = null;
+        PreparedStatement pstmt = null;
+
+        if (!productID.isEmpty()) {
+            try {
+                String query = "SELECT PRODUCTNAME FROM INVENTORY WHERE PRODUCTNAME = ? AND USERID = ?";
+                pstmt = conn.prepareStatement(query);
+                pstmt.setString(1, productID);
+                pstmt.setInt(2, currentUserID);
+                rs = pstmt.executeQuery(); // get product name
+
+                if (rs.next()) { // matching product name found
+                    return true;
+                } else {
+                    popupWindow.displayPopup("Error: invalid input!", "This product doesn't exist in your inventory");
+                    return false;
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        } else {
+            popupWindow.displayPopup("Error: invalid input!", "Please enter a valid product name and/or product quantity");
+            return false;
+        }
+
+        return false;
+    }
+
+    public boolean verifyUpdatingInput(String productID, String quantityText) {
+        // Checks if the users input is valid for updating product
+        int currentUserID = getUserID(currentUser);
+        ResultSet rs = null;
+        PreparedStatement pstmt = null;
+
+        if (!productID.isEmpty() && !quantityText.isEmpty()) {
+            if (isInteger(quantityText)) {
+                try {
+                    String query = "SELECT PRODUCTNAME FROM INVENTORY WHERE PRODUCTNAME = ? AND USERID = ?";
+                    pstmt = conn.prepareStatement(query);
+                    pstmt.setString(1, productID);
+                    pstmt.setInt(2, currentUserID);
+                    rs = pstmt.executeQuery(); // get product name
+
+                    if (rs.next()) { // matching product name found
+                        return true;
+                    } else {
+                        popupWindow.displayPopup("Error: invalid input!", "This product doesn't exist in your inventory");
+                        return false;
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                popupWindow.displayPopup("Error: invalid input!", "Please enter a valid interger for quantity");
+                return false;
+            }
+        } else {
+            popupWindow.displayPopup("Error: invalid input!", "Please enter a valid product name and/or product quantity");
+            return false;
+        }
+
+        return false;
+    }
+
+    public boolean isInteger(String input) {
+        // Checks if string is an int
+        try {
+
+            if (Integer.parseInt(input) > 0) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
 }

@@ -1,10 +1,15 @@
 package InventoryManagementGUI;
 
+/**
+ *
+ * @author rocco + beedrix
+ */
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
 public class CreateNewUserGUI extends JFrame {
+
     private CreateNewUserController controller;
     private JTextField usernameField;
     private JPasswordField passwordField;
@@ -15,7 +20,6 @@ public class CreateNewUserGUI extends JFrame {
     private JLabel passwordLabel;
     private JPanel inputPanel;
     private GridBagConstraints gbc;
-    
 
     public CreateNewUserGUI(CreateNewUserController controller) {
         this.controller = controller;
@@ -28,7 +32,7 @@ public class CreateNewUserGUI extends JFrame {
         this.gbc = new GridBagConstraints();
         this.usernameField = new JTextField();
         this.passwordField = new JPasswordField();
-        
+
         setWindow();
         createTextField();
         createButton();
@@ -99,7 +103,7 @@ public class CreateNewUserGUI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 resetTextFields();
                 dispose(); // Dispose the CreateNewUserGUI window
-                
+
                 // Return to the LoginGUI window
                 LoginController loginController = new LoginController();
                 LoginGUI loginGUI = new LoginGUI(loginController);
@@ -113,7 +117,7 @@ public class CreateNewUserGUI extends JFrame {
         titleLabel.setFont(new Font("Arial", Font.BOLD, 30));
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         titleLabel.setForeground(Color.WHITE);
-        
+
         usernameLabel.setForeground(Color.WHITE);
         passwordLabel.setForeground(Color.WHITE);
     }
@@ -128,7 +132,7 @@ public class CreateNewUserGUI extends JFrame {
         inputPanel.setPreferredSize(new Dimension(400, 120));
         inputPanel.setBorder(BorderFactory.createLineBorder(new Color(80, 80, 80), 2));
         inputPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        
+
         gbc.gridx = 0;
         gbc.gridy = 0;
         inputPanel.add(usernameLabel, gbc);
@@ -147,7 +151,7 @@ public class CreateNewUserGUI extends JFrame {
     }
 
     public void resetTextFields() {
-    // Clears text fields after user has pressed signup/goback
+        // Clears text fields after user has pressed signup/goback
         usernameField.setText("");
         passwordField.setText("");
     }

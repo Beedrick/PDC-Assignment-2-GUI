@@ -1,5 +1,10 @@
 package InventoryManagementGUI;
 
+/**
+ *
+ * @author rocco + beedrix
+ */
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -24,71 +29,136 @@ public class CreateOrderGUI {
     public MainMenuController currUser;
     private MainMenuGUI mMG;
     private JTable table;
-    private JButton downloadReceiptButton;
     private CreateOrderController controller;
+    private JButton confirmButton;
+    private JButton orderHistoryButton;
+    private JButton goBackButton;
+    private JButton exitButton;
+    private JButton downloadReceiptButton;
+    // inventory table
+    private JTable inventoryTable;
+    private DefaultTableModel inventoryTableModel;
+    private CreateOrder[] inventoryArray;
+    // car catalogue table
     private static int orderID = 1;
 
     public CreateOrderGUI(MainMenuController currUser) {
-        this.controller = controller;
+        this.controller = new CreateOrderController();
         this.currUser = currUser;
         frame = new JFrame("Create Order");
-        frame.setSize(1400, 900);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.buttonFont = new Font("Arial", Font.BOLD, 24);
-        this.buttonColor = new Color(45, 120, 230);
         contentPanel = new JPanel();
         contentPanel.setLayout(new BorderLayout());
+        this.controller.setCurrentUser(currUser.getCurrentUser());
 
-// Create a header panel
+        createTables();
+        setOrderButtonStyle();
+        createOrderButtons();
+        setOrderButtons();
+        setPanel();
+        setFrame();
+
+    }
+
+    //Setting frame
+    public void setFrame() {
+
+        frame.setSize(1400, 900);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.add(contentPanel);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+
+    }
+
+    public void setPanel() {
+        // Create a header panel
         JPanel headerPanel = new JPanel();
         headerPanel.setBackground(new Color(40, 44, 52));
         headerPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
-
 // Create a label for the header text
         JLabel headerLabel = new JLabel("Your Order");
         headerLabel.setFont(new Font("Arial", Font.BOLD, 24));
         headerLabel.setForeground(Color.WHITE);
         headerPanel.add(headerLabel);
-
 // Add the header panel to the top of the content panel
         contentPanel.add(headerPanel, BorderLayout.NORTH);
-
         // Create the left panel with the desired color
         JPanel leftPanel = new JPanel();
         leftPanel.setBackground(new Color(40, 44, 52));
         leftPanel.setLayout(new GridBagLayout());// Use GridBagLayout for flexible layout
-
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gbc.insets = new Insets(10, 10, 0, 10); // Adjust spacing between buttons
+        // Add the Confirm Order button
+        leftPanel.add(confirmButton, gbc);
+        // Add the Order History button
+        leftPanel.add(orderHistoryButton, gbc);
+// Create a new panel for the button and set its layout
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+// Add the Download Receipt button to the button panel
+        buttonPanel.add(downloadReceiptButton);
+// Add the button panel to the content panel at the bottom
+        contentPanel.add(buttonPanel, BorderLayout.SOUTH);
+        gbc.insets = new Insets(10, 10, 10, 10); // Adjust spacing between buttons
+        gbc.anchor = GridBagConstraints.PAGE_START;
+        gbc.weighty = 1.0;
+        // Add the Back to Main Menu button
+        leftPanel.add(goBackButton, gbc);
+        // Add the Download Receipt button
+        // Add the Exit button
+        leftPanel.add(exitButton, gbc);
+        contentPanel.add(leftPanel, BorderLayout.WEST);
+        // Fetch data from the database and create the table
+        //displayTable(fetchInventoryDataFromDatabase());
+        // Create the table using the table model
+        // table = new JTable(tableModel);
 
-        // Create buttons and add them to the left panel
-        JButton confirmButton = createStyledButton("Confirm Order", buttonFont, buttonColor);
-        JButton orderHistoryButton = createStyledButton("Order History", buttonFont, buttonColor);
-        JButton goBackButton = createStyledButton("Back to Main Menu", buttonFont, buttonColor);
-        JButton exitButton = createStyledButton("Exit", buttonFont, buttonColor);
-        downloadReceiptButton = createStyledButton("Download Receipt", buttonFont, buttonColor);
-        downloadReceiptButton.setVisible(false); // Set downloadReceiptButton initially invisible
+        JScrollPane scrollPane = new JScrollPane(table);
+        // Create a panel for the table
+        JPanel tablePanel = new JPanel(new BorderLayout());
+        tablePanel.add(scrollPane, BorderLayout.CENTER);
+        // Add the table panel to the content panel
+        contentPanel.add(tablePanel, BorderLayout.CENTER);
+        openInventoryPanel();
 
-        goBackButton.addActionListener(new ActionListener() {
+    }
+
+    //Setting action listeners for Confirming order button
+    public void confirmButton() {
+        confirmButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                frame.dispose();
-                MainMenuGUI backMain = new MainMenuGUI(currUser);
+                int confirmation = JOptionPane.showConfirmDialog(frame, "Are you sure you want to commit your order?\nYour Inventory will be reset if yes.", "Confirmation", JOptionPane.YES_NO_OPTION);
+                if (confirmation == JOptionPane.YES_OPTION) {
+                    // Perform order confirmation actions here
+
+                    // Insert data from the table into the ORDERINVENTORY table
+                    insertDataIntoOrderInventory();
+
+                    // Remove user's inventory from the INVENTORY table
+                    removeUserInventory();
+
+                    // Increment order ID for the next order
+                    orderID++;
+
+                    // Set downloadReceiptButton visible after order confirmation
+                    downloadReceiptButton.setVisible(true);
+                }
             }
         });
+    }
 
-        exitButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                System.exit(0); // Exit the program with a status code of 0
-            }
-        });
-
+    //Setting action listeners for download receipt Button
+    public void downloadButton() {
         downloadReceiptButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 downloadReceipt();
             }
         });
+    }
 
+    //Setting action listeners for Order History Button
+    public void historyButton() {
         orderHistoryButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 // Fetch order history data from the database
@@ -111,75 +181,57 @@ public class CreateOrderGUI {
                 orderHistoryFrame.setVisible(true);
             }
         });
+    }
 
-        confirmButton.addActionListener(new ActionListener() {
+    //Initialize JButtons for this class using method createStyledButton()
+    public void createOrderButtons() {
+        this.confirmButton = createStyledButton("Confirm Order", buttonFont, buttonColor);
+        this.orderHistoryButton = createStyledButton("Order History", buttonFont, buttonColor);
+        this.goBackButton = createStyledButton("Back to Main Menu", buttonFont, buttonColor);
+        this.exitButton = createStyledButton("Exit", buttonFont, buttonColor);
+        downloadReceiptButton = createStyledButton("Download Receipt", buttonFont, buttonColor);
+        downloadReceiptButton.setVisible(false); // Set downloadReceiptButton initially invisible
+
+    }
+
+    //sets formatting and color for button style
+    public void setOrderButtonStyle() {
+
+        this.buttonFont = new Font("Arial", Font.BOLD, 24);
+        this.buttonColor = new Color(45, 120, 230);
+    }
+
+    //method that sets all JButtons action listeners
+    public void setOrderButtons() {
+        goBack();
+        exitButton();
+        downloadButton();
+        historyButton();
+        confirmButton();
+    }
+
+    public void goBack() {
+        goBackButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                int confirmation = JOptionPane.showConfirmDialog(frame, "Are you sure you want to commit your order?", "Confirmation", JOptionPane.YES_NO_OPTION);
-                if (confirmation == JOptionPane.YES_OPTION) {
-                    // Perform order confirmation actions here
-
-                    // Insert data from the table into the ORDERINVENTORY table
-                    insertDataIntoOrderInventory();
-
-                    // Remove user's inventory from the INVENTORY table
-                    removeUserInventory();
-
-                    // Increment order ID for the next order
-                    orderID++;
-
-                    // Set downloadReceiptButton visible after order confirmation
-                    downloadReceiptButton.setVisible(true);
-                }
+                frame.dispose();
+                MainMenuGUI backMain = new MainMenuGUI(currUser);
             }
         });
 
-        // Add the Confirm Order button
-        leftPanel.add(confirmButton, gbc);
-
-        // Add the Order History button
-        leftPanel.add(orderHistoryButton, gbc);
-
-// Create a new panel for the button and set its layout
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
-
-// Add the Download Receipt button to the button panel
-        buttonPanel.add(downloadReceiptButton);
-
-// Add the button panel to the content panel at the bottom
-        contentPanel.add(buttonPanel, BorderLayout.SOUTH);
-
-        gbc.insets = new Insets(10, 10, 10, 10); // Adjust spacing between buttons
-        gbc.anchor = GridBagConstraints.PAGE_START;
-        gbc.weighty = 1.0;
-
-        // Add the Back to Main Menu button
-        leftPanel.add(goBackButton, gbc);
-
-        // Add the Download Receipt button
-        // Add the Exit button
-        leftPanel.add(exitButton, gbc);
-
-        contentPanel.add(leftPanel, BorderLayout.WEST);
-
-        // Fetch data from the database and create the table
-        DefaultTableModel tableModel = fetchInventoryDataFromDatabase();
-
-        // Create the table using the table model
-        table = new JTable(tableModel);
-        JScrollPane scrollPane = new JScrollPane(table);
-        // Create a panel for the table
-        JPanel tablePanel = new JPanel(new BorderLayout());
-        tablePanel.add(scrollPane, BorderLayout.CENTER);
-
-// Add the table panel to the content panel
-        contentPanel.add(tablePanel, BorderLayout.CENTER);
     }
 
-    public void setVisible() {
-        frame.add(contentPanel);
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+    public void exitButton() {
+
+        exitButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0); // Exit the program with a status code of 0
+            }
+        });
+
+    }
+
+    public void disposeFrame() {
+        frame.dispose();
     }
 
     public JButton createStyledButton(String text, Font font, Color color) {
@@ -249,49 +301,35 @@ public class CreateOrderGUI {
         return model;
     }
 
-    public DefaultTableModel fetchInventoryDataFromDatabase() {
-        // JDBC database connection details
-        String url = "jdbc:derby:InventoryDB1;";
-        String username = "gui";
-        String password = "gui";
+    public void openInventoryPanel() {
 
-        // Create a table model with column names
-        DefaultTableModel model = new DefaultTableModel();
-        model.setColumnIdentifiers(new Object[]{"USERID", "PRODUCTNAME", "PRODUCTBRAND", "PRODUCTPRICE", "PRODUCTTYPE", "PRODUCTQUANTITY"});
+        inventoryArray = controller.getInventory(); // get current users inventory from DB as an inventory obj array
+        inventoryTableModel.setRowCount(0); // clear inventory table
 
-        try {
-            // Connect to the database
-            Connection connection = DriverManager.getConnection(url, username, password);
-
-            // Prepare the SQL statement with a parameter
-            String query = "SELECT * FROM INVENTORY WHERE USERID = ?";
-            PreparedStatement statement = connection.prepareStatement(query);
-            statement.setInt(1, currUser.getUserID(currUser.getCurrentUser())); // Set the parameter value
-
-            // Execute the query and retrieve the result set
-            ResultSet resultSet = statement.executeQuery();
-
-            // Iterate through the result set and add data to the table model
-            while (resultSet.next()) {
-                int id = resultSet.getInt("USERID");
-                String prodName = resultSet.getString("PRODUCTNAME");
-                String prodBrand = resultSet.getString("PRODUCTBRAND");
-                double price = resultSet.getDouble("PRODUCTPRICE");
-                String prodType = resultSet.getString("PRODUCTTYPE");
-                int quantity = resultSet.getInt("PRODUCTQUANTITY");
-
-                model.addRow(new Object[]{id, prodName, prodBrand, price, prodType, quantity});
-            }
-
-            // Close the result set, statement, and connection
-            resultSet.close();
-            statement.close();
-            connection.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        // loop through currentUser inventory array
+        for (CreateOrder item : inventoryArray) {
+            Object[] rowData = new Object[]{
+                item.getProductName(),
+                item.getProductBrand(),
+                item.getProductPrice(),
+                item.getProductType(),
+                item.getProductQuantity()
+            };
+            inventoryTableModel.addRow(rowData); // add current obj to corresponding row
         }
 
-        return model;
+        // turn table model into table and display users current inventory
+        inventoryTable = new JTable(inventoryTableModel);
+        displayTable(inventoryTable);
+
+    }
+
+    public void displayTable(JTable table) {
+
+        // Create a scrollable pane for the table
+        JScrollPane scrollPane = new JScrollPane(table);
+     
+        contentPanel.add(scrollPane, BorderLayout.CENTER);
     }
 
     public void downloadReceipt() {
@@ -433,10 +471,16 @@ public class CreateOrderGUI {
 
             // Close the statement
             statement.close();
-            
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public void createTables() {
+        // Create inventory and car catalogue table model
+        this.inventoryTableModel = new DefaultTableModel();
+        this.inventoryTableModel.setColumnIdentifiers(new String[]{"Product Name", "Product Brand", "Product Price", "Product Type", "Product Quantity"});
     }
 
 }

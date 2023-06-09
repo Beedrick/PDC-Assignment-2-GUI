@@ -1,117 +1,88 @@
 package InventoryManagementGUI;
 
+/**
+ *
+ * @author rocco + beedrix
+ */
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
 import javax.swing.BorderFactory;
-import javax.swing.border.Border;
-import java.util.Arrays;
 
 public class MainMenuGUI {
 
+    private PopupWindow popupWindow;
     private MainMenuController controller;
+    // styling for side panel buttons
     private Font buttonFont;
     private Color buttonColor;
-    private JFrame frame;
-    private JPanel sidePanel;
+    // menu buttons that belong in side panel
     private JButton viewInventoryButton;
-    private JButton exitButton;
     private JButton viewCarProductsButton;
-    private JButton addProductButton;
+    private JButton addProductMenuButton;
     private JButton createOrderButton;
-    private JButton removeProductButton;
-    private JButton updateQuantityButton;
+    private JButton removeProductMenuButton;
+    private JButton updateQuantityMenuButton;
+    private JButton exitButton;
+    // text fields for manipulating inventory
     private JTextField productIDTextField;
     private JTextField quantityTextField;
-    private JButton updateAddButton;
-    private JButton updateRemoveButton;
-    private JButton changeQuantityButton;
-    private GridBagConstraints constraints;
-    private static JPanel contentPanel; // Panel to display contents
-    private DatabaseManager databaseManager;
+    // buttons that update the inventory
+    private JButton addProductButton;
+    private JButton removeProductButton;
+    private JButton updateQuantityButton;
+    // inventory table
     private JTable inventoryTable;
     private DefaultTableModel inventoryTableModel;
     private Inventory[] inventoryArray;
+    private DatabaseManager databaseManager;
+    // car catalogue table
+    private JTable carCatalogueTable;
+    private DefaultTableModel carCatalogueTableModel;
+    private CarCatalogue[] carCatalogueArray;
+    // panels and frames to display content
+    private GridBagConstraints constraints;
+    private JFrame frame;
+    private JPanel sidePanel;
+    private static JPanel contentPanel;
+    private boolean carCatalogueDisplayed = false;
 
     public MainMenuGUI(MainMenuController controller) {
         this.controller = controller;
-        this.buttonFont = new Font("Arial", Font.BOLD, 24);
-        this.buttonColor = new Color(45, 120, 230);
+        // panels and frames to display content
         this.frame = new JFrame("Inventory Management System");
         this.sidePanel = new JPanel();
         this.constraints = new GridBagConstraints();
-        this.viewInventoryButton = createStyledButton("View Inventory", buttonFont, buttonColor);
-        this.viewCarProductsButton = createStyledButton("Car Products Catalogue", buttonFont, buttonColor);
-        this.addProductButton = createStyledButton("Add Product", buttonFont, buttonColor);
-        this.removeProductButton = createStyledButton("Remove Product", buttonFont, buttonColor);
-        this.updateQuantityButton = createStyledButton("Update Quantity", buttonFont, buttonColor);
-        this.exitButton = createStyledButton("Exit", buttonFont, buttonColor);
-        this.productIDTextField = new JTextField();
-        this.quantityTextField = new JTextField();
-        this.updateAddButton = new JButton("");
-        this.updateRemoveButton = new JButton("");
-        this.changeQuantityButton = new JButton("");
 
-        createOrderButton = createStyledButton("Create Order", buttonFont, buttonColor);
-        createOrderButton.setVisible(false);
-
-        createTable();
-        setFrame();
+        // Methods which intalise components of the GUI
+        createTables();
+        setMenuButtonStyle();
+        createMenuButtons();
+        createUpdateInventoryButtons();
+        createTextFields();
+        setMenuButtons();
         setSidePanel();
-        setButtons();
+        setFrame();
         displayFrame();
     }
 
-    public void createTable() {
-        this.inventoryTableModel = new DefaultTableModel();
-        this.inventoryTableModel.setColumnIdentifiers(new String[]{"Product Name", "Product Brand", "Product Price", "Product Type", "Product Quantity"});
-    }
-
-    public JButton createStyledButton(String text, Font font, Color color) {
-        // Helper method to create styled buttons
-        JButton button = new JButton(text);
-        button.setFont(font);
-        button.setBackground(color);
-        button.setForeground(Color.WHITE);
-        button.setFocusPainted(false);
-        button.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        return button;
-    }
-
-    public void addToSidePanel(JPanel sidePanel, Component component, int gridx, int gridy) {
-        // Helper method to add components to the side panel with GridBagLayout
-        constraints.gridx = gridx;
-        constraints.gridy = gridy;
-        constraints.anchor = GridBagConstraints.NORTHWEST;
-        constraints.insets = new Insets(20, 20, 20, 20);
-        constraints.fill = GridBagConstraints.HORIZONTAL;
-        sidePanel.add(component, constraints);
-    }
-
-    public void displayUpdateInventory(int updateType) {
+    public void displayInventoryUpdater(int updateType) {
         /* Updates the panel to display content for user to update their inventory
-        UPDATE TYPES:
-            1) Add a product
-            2) Remove a product
-            3) Update quantity of product */
+    UPDATE TYPES:
+        1) Add a product
+        2) Remove a product
+        3) Update quantity of product */
+        String[] updateStrings = controller.getUpdateStrings(updateType); // update strings for title and corresponding labels for textfields
 
-        String[] updateStrings = controller.getUpdateStrings(updateType);
-
-        contentPanel.removeAll(); // Clear previous content
-
-        // Set GridBagLayout as the layout manager
+        // Clear previous content and setup layout
+        contentPanel.removeAll();
         contentPanel.setLayout(new GridBagLayout());
-
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(10, 10, 10, 10); // Add spacing between components
+        gbc.insets = new Insets(10, 10, 10, 10);
 
+        // Set title
         JLabel titleLabel = new JLabel(updateStrings[0]);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24)); // Update font and size
         gbc.gridx = 0;
@@ -120,7 +91,7 @@ public class MainMenuGUI {
         gbc.anchor = GridBagConstraints.CENTER; // Center-align the title
         contentPanel.add(titleLabel, gbc);
 
-        // Create labels for ProductID and Add
+        // Display label and text field for productID section
         JLabel productIDLabel = new JLabel("Product ID: ");
         productIDLabel.setFont(new Font("Arial", Font.PLAIN, 18)); // Update font and size
         gbc.gridx = 0;
@@ -136,81 +107,208 @@ public class MainMenuGUI {
         gbc.anchor = GridBagConstraints.WEST; // Left-align the text field
         contentPanel.add(productIDTextField, gbc);
 
-        if (updateType == 1 || updateType == 3) {
-            JLabel quantityLabel = new JLabel(updateStrings[1]);
-            quantityLabel.setFont(new Font("Arial", Font.PLAIN, 18)); // Update font and size
-            gbc.gridx = 0;
-            gbc.gridy = 2;
-            gbc.anchor = GridBagConstraints.EAST; // Right-align the label
-            contentPanel.add(quantityLabel, gbc);
-
-            quantityTextField.setPreferredSize(new Dimension(250, 40));
-            quantityTextField.setFont(new Font("Arial", Font.PLAIN, 18));
-            gbc.gridx = 1;
-            gbc.gridy = 2;
-            gbc.anchor = GridBagConstraints.WEST; // Left-align the text field
-            contentPanel.add(quantityTextField, gbc);
+        if (updateType == 1 || updateType == 3) { // display quantity section for add product and update quantity
+            displayQuantitySection(gbc, updateStrings);
         }
 
-        // Update confirm button based on updateType
-        if (updateType == 1) { // ADD PRODUCT
-            updateAddButton.setVisible(true);
-            updateRemoveButton.setVisible(false);
-            changeQuantityButton.setVisible(true);
-
-            updateAddButton.setText(updateStrings[2]);
-            updateAddButton.setFont(new Font("Arial", Font.BOLD, 18)); // Update font and size
-            updateAddButton.setBackground(new Color(0, 150, 0)); // Darker green color
-
-            updateAddButton.setForeground(Color.WHITE);
-            gbc.gridx = 0;
-            gbc.gridy = 3;
-            gbc.gridwidth = 2;
-            gbc.anchor = GridBagConstraints.CENTER; // Center-align the button
-            gbc.ipady = 20; // Increase button height
-            contentPanel.add(updateAddButton, gbc);
-            updateAddButton.setBorder(null);
-
-        } else if (updateType == 2) { // REMOVE PRODUCT
-            updateAddButton.setVisible(false);
-            updateRemoveButton.setVisible(true);
-            changeQuantityButton.setVisible(true);
-
-            updateRemoveButton.setText(updateStrings[2]);
-            updateRemoveButton.setFont(new Font("Arial", Font.BOLD, 18)); // Update font and size
-            updateRemoveButton.setBackground(new Color(0, 150, 0)); // Darker green color
-
-            updateRemoveButton.setForeground(Color.WHITE);
-            gbc.gridx = 0;
-            gbc.gridy = 3;
-            gbc.gridwidth = 2;
-            gbc.anchor = GridBagConstraints.CENTER; // Center-align the button
-            gbc.ipady = 20; // Increase button height
-            contentPanel.add(updateRemoveButton, gbc);
-            updateRemoveButton.setBorder(null);
-
-        } else if (updateType == 3) { // UPDATE QUANTITY
-            updateAddButton.setVisible(false);
-            updateRemoveButton.setVisible(false);
-            changeQuantityButton.setVisible(true);
-
-            changeQuantityButton.setText(updateStrings[2]);
-            changeQuantityButton.setFont(new Font("Arial", Font.BOLD, 18)); // Update font and size
-            changeQuantityButton.setBackground(new Color(0, 150, 0)); // Darker green color
-
-            changeQuantityButton.setForeground(Color.WHITE);
-            gbc.gridx = 0;
-            gbc.gridy = 3;
-            gbc.gridwidth = 2;
-            gbc.anchor = GridBagConstraints.CENTER; // Center-align the button
-            gbc.ipady = 20; // Increase button height
-            contentPanel.add(changeQuantityButton, gbc);
-            changeQuantityButton.setBorder(null);
+        // Update the confirm button based on updateType
+        if (updateType == 1) { // add product button
+            displayAddProductButton(gbc);
+        } else if (updateType == 2) { // remove product button
+            displayRemoveProductButton(gbc);
+        } else if (updateType == 3) { // update quantity button
+            displayUpdateQuantityButton(gbc);
         }
 
-        // Repaint the content panel to reflect the changes
         contentPanel.revalidate();
         contentPanel.repaint();
+    }
+
+    public void setMenuButtons() {
+        // Calls the methods of each menu button
+        addProductButton.setEnabled(false);
+        removeProductButton.setEnabled(false);
+        updateQuantityButton.setEnabled(false);
+        openInventoryPanel(); // Button 1: View Inventory Menu Button
+        openAddProductPanel(); // Button 2: Add a product button
+        openRemoveProductPanel(); // Button 3: Remove a product button
+        openUpdateQuantityPanel(); // Button 4: Update quantity of a product button
+        openCarCataloguePanel(); // Button 5: View car catalogue Button
+        // Button 6: Exit Program
+        exitButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0); // Exit the program with a status code of 0
+            }
+        });
+    }
+
+    public void openInventoryPanel() {
+        // Displays panel contents relative to the users inventory and creating an order 
+        viewInventoryButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Enable/disable buttons so nothing is accidentally clicked
+                addProductButton.setEnabled(false);
+                removeProductButton.setEnabled(false);
+                updateQuantityButton.setEnabled(false);
+
+                inventoryArray = controller.getInventory(); // get current users inventory from DB as an inventory obj array
+                inventoryTableModel.setRowCount(0); // clear inventory table
+
+                // loop through currentUser inventory array
+                for (Inventory item : inventoryArray) {
+                    Object[] rowData = new Object[]{
+                        item.getProductName(),
+                        item.getProductBrand(),
+                        item.getProductPrice(),
+                        item.getProductType(),
+                        item.getProductQuantity()
+                    };
+                    inventoryTableModel.addRow(rowData); // add current obj to corresponding row
+                }
+
+                // turn table model into table and display users current inventory
+                inventoryTable = new JTable(inventoryTableModel);
+                displayTable(inventoryTable);
+
+                if (inventoryArray.length > 0) { // if items in inventory then display create order button
+                    displayOrderButton();
+                }
+                if (createOrderButton.getActionListeners().length == 0) {
+                    createOrderButton.addActionListener(new ActionListener() {
+                        public void actionPerformed(ActionEvent e) {
+                            frame.dispose(); // Dispose the current frame
+                            CreateOrderGUI createOrderGUI = new CreateOrderGUI(controller); // create a new CreateOrderGUI window
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    public void openAddProductPanel() {
+        // Displays panel contents relative to adding a product into the user's inventory
+        addProductMenuButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Enable/disable buttons
+                addProductButton.setEnabled(true);
+                removeProductButton.setEnabled(false);
+                updateQuantityButton.setEnabled(false);
+                displayInventoryUpdater(1);
+
+                if (addProductButton.getActionListeners().length == 0) {
+                    addProductButton.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            // get values from text fields
+                            String productID = productIDTextField.getText().toUpperCase();
+                            String quantityText = quantityTextField.getText();
+                            int quantity = 0;
+
+                            if (controller.verifyAddingInput(productID, quantityText)) { // if user's input is valid
+                                quantity = Integer.parseInt(quantityText); // change quantityText to an int
+                                controller.addProduct(productID, quantity); // add a product
+                            }
+
+                            resetTextFields();
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    public void openRemoveProductPanel() {
+        // Displays panel contents relative to removing a product from the user's inventory
+        removeProductMenuButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Enable/disable buttons
+                addProductButton.setEnabled(false);
+                removeProductButton.setEnabled(true);
+                updateQuantityButton.setEnabled(false);
+                displayInventoryUpdater(2);
+
+                if (removeProductButton.getActionListeners().length == 0) {
+                    removeProductButton.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            // get values from text fields
+                            String productID = productIDTextField.getText().toUpperCase();
+
+                            if (controller.verifyRemovingInput(productID)) { // if user's input is valid
+                                controller.removeProduct(productID); // remove a product
+                            }
+
+                            resetTextFields();
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    public void openUpdateQuantityPanel() {
+        // Displays panel contents relative to updating a product's quantity in the user's inventory
+        updateQuantityMenuButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Enable/disable buttons
+                addProductButton.setEnabled(false);
+                removeProductButton.setEnabled(false);
+                updateQuantityButton.setEnabled(true);
+                displayInventoryUpdater(3); // gets contents for panel
+
+                if (updateQuantityButton.getActionListeners().length == 0) {
+                    updateQuantityButton.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            // get values from text fields
+                            String productID = productIDTextField.getText().toUpperCase();
+                            String quantityText = quantityTextField.getText();
+                            int quantity = 0;
+
+                            if (controller.verifyUpdatingInput(productID, quantityText)) { // if user's input is valid
+                                quantity = Integer.parseInt(quantityText); // change quantityText to an int
+                                controller.updateProductQuantity(productID, quantity); // update quantity of a product
+                            }
+
+                            resetTextFields();
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    public void openCarCataloguePanel() {
+        // Displays panel which displays a table of all car products to select from
+        if (viewCarProductsButton.getActionListeners().length == 0) {
+
+            viewCarProductsButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    // Enable/disable buttons so nothing is accidentally clicked
+                    addProductButton.setEnabled(false);
+                    removeProductButton.setEnabled(false);
+                    updateQuantityButton.setEnabled(false);
+
+                    if (!carCatalogueDisplayed) {
+                        carCatalogueArray = controller.getCarCatalogue(); // retrieve car catalogue records from DB and store in array
+
+                        for (CarCatalogue item : carCatalogueArray) { // loop through car catalogue array
+                            Object[] rowData = new Object[]{
+                                item.getProductName(),
+                                item.getProductBrand(),
+                                item.getProductPrice(),
+                                item.getProductType()
+                            };
+                            carCatalogueTableModel.addRow(rowData); // add current obj to corresponding row
+                        }
+
+                        carCatalogueTable = new JTable(carCatalogueTableModel);
+                        displayTable(carCatalogueTable);
+                        carCatalogueDisplayed = true;
+                    }
+                }
+            });
+        }
     }
 
     public void displayTable(JTable table) {
@@ -241,11 +339,153 @@ public class MainMenuGUI {
         contentPanel.repaint();
     }
 
+    public void displayAddProductButton(GridBagConstraints gbc) {
+        // Display the add product to inventory
+        addProductButton.setVisible(true);
+        removeProductButton.setVisible(false);
+        updateQuantityButton.setVisible(true);
+
+        addProductButton.setText("add product(s)");
+        addProductButton.setFont(new Font("Arial", Font.BOLD, 18)); // Update font and size
+        addProductButton.setBackground(new Color(0, 150, 0)); // Darker green color
+
+        addProductButton.setForeground(Color.WHITE);
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER; // Center-align the button
+        gbc.ipady = 20; // Increase button height
+        contentPanel.add(addProductButton, gbc);
+        addProductButton.setBorder(null);
+    }
+
+    public void displayRemoveProductButton(GridBagConstraints gbc) {
+        addProductButton.setVisible(false);
+        removeProductButton.setVisible(true);
+        updateQuantityButton.setVisible(true);
+
+        removeProductButton.setText("remove product");
+        removeProductButton.setFont(new Font("Arial", Font.BOLD, 18)); // Update font and size
+        removeProductButton.setBackground(Color.RED);
+        removeProductButton.setForeground(Color.WHITE);
+
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER; // Center-align the button
+        gbc.ipady = 20; // Increase button height
+        contentPanel.add(removeProductButton, gbc);
+        removeProductButton.setBorder(null);
+    }
+
+    public void displayUpdateQuantityButton(GridBagConstraints gbc) {
+        addProductButton.setVisible(false);
+        removeProductButton.setVisible(false);
+        updateQuantityButton.setVisible(true);
+
+        updateQuantityButton.setText("update quantity");
+        updateQuantityButton.setFont(new Font("Arial", Font.BOLD, 18)); // Update font and size
+        updateQuantityButton.setBackground(Color.BLUE);
+        updateQuantityButton.setForeground(Color.WHITE);
+
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER; // Center-align the button
+        gbc.ipady = 20; // Increase button height
+        contentPanel.add(updateQuantityButton, gbc);
+        updateQuantityButton.setBorder(null);
+    }
+
+    public void displayQuantitySection(GridBagConstraints gbc, String[] updateStrings) {
+        JLabel quantityLabel = new JLabel(updateStrings[1]);
+        quantityLabel.setFont(new Font("Arial", Font.PLAIN, 18)); // Update font and size
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.anchor = GridBagConstraints.EAST; // Right-align the label
+        contentPanel.add(quantityLabel, gbc);
+
+        quantityTextField.setPreferredSize(new Dimension(250, 40));
+        quantityTextField.setFont(new Font("Arial", Font.PLAIN, 18));
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        gbc.anchor = GridBagConstraints.WEST; // Left-align the text field
+        contentPanel.add(quantityTextField, gbc);
+    }
+
+    public void resetTextFields() {
+        productIDTextField.setText("");
+        quantityTextField.setText("");
+    }
+
     public void setFrame() {
         frame.setSize(1400, 900);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         frame.add(sidePanel, BorderLayout.WEST);
+    }
+
+    public void createTables() {
+        // Create inventory and car catalogue table model
+        this.inventoryTableModel = new DefaultTableModel();
+        this.inventoryTableModel.setColumnIdentifiers(new String[]{"Product Name", "Product Brand", "Product Price", "Product Type", "Product Quantity"});
+
+        this.carCatalogueTableModel = new DefaultTableModel();
+        this.carCatalogueTableModel.setColumnIdentifiers(new String[]{"Product Name", "Product Brand", "Product Price", "Product Type"});
+    }
+
+    public void createTextFields() {
+        // Create text fields for manipulating inventory
+        this.productIDTextField = new JTextField();
+        this.quantityTextField = new JTextField();
+    }
+
+    public void createMenuButtons() {
+        // Initalise menu buttons that belong in side panel 
+        this.viewInventoryButton = createStyledButton("View Inventory", buttonFont, buttonColor);
+        this.viewCarProductsButton = createStyledButton("Car Products Catalogue", buttonFont, buttonColor);
+        this.addProductMenuButton = createStyledButton("Add Product", buttonFont, buttonColor);
+        this.removeProductMenuButton = createStyledButton("Remove Product", buttonFont, buttonColor);
+        this.updateQuantityMenuButton = createStyledButton("Update Quantity", buttonFont, buttonColor);
+        this.exitButton = createStyledButton("Exit", buttonFont, buttonColor);
+    }
+
+    public void createUpdateInventoryButtons() {
+        // Create buttons that update the inventory
+        this.addProductButton = new JButton("");
+        this.removeProductButton = new JButton("");
+        this.updateQuantityButton = new JButton("");
+
+        // button that takes current inventory to create an order
+        this.createOrderButton = createStyledButton("Create Order", buttonFont, buttonColor);
+        this.createOrderButton.setVisible(false);
+    }
+
+    public void setMenuButtonStyle() {
+        // Set styling for side panel buttons
+        this.buttonFont = new Font("Arial", Font.BOLD, 24);
+        this.buttonColor = new Color(45, 120, 230);
+    }
+
+    public JButton createStyledButton(String text, Font font, Color color) {
+        // Helper method to create styled buttons
+        JButton button = new JButton(text);
+        button.setFont(font);
+        button.setBackground(color);
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        return button;
+    }
+
+    public void addToSidePanel(JPanel sidePanel, Component component, int gridx, int gridy) {
+        // Helper method to add components to the side panel with GridBagLayout
+        constraints.gridx = gridx;
+        constraints.gridy = gridy;
+        constraints.anchor = GridBagConstraints.NORTHWEST;
+        constraints.insets = new Insets(20, 20, 20, 20);
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        sidePanel.add(component, constraints);
     }
 
     public void setSidePanel() {
@@ -254,152 +494,15 @@ public class MainMenuGUI {
 
         // Add side panel contents
         addToSidePanel(sidePanel, viewInventoryButton, 0, 0);
-        addToSidePanel(sidePanel, addProductButton, 0, 1);
-        addToSidePanel(sidePanel, removeProductButton, 0, 2);
-        addToSidePanel(sidePanel, updateQuantityButton, 0, 3);
+        addToSidePanel(sidePanel, addProductMenuButton, 0, 1);
+        addToSidePanel(sidePanel, removeProductMenuButton, 0, 2);
+        addToSidePanel(sidePanel, updateQuantityMenuButton, 0, 3);
         addToSidePanel(sidePanel, viewCarProductsButton, 0, 4);
         addToSidePanel(sidePanel, exitButton, 0, 5);
     }
 
-    public void setButtons() {
-        // Box 1: View Inventory
-        viewInventoryButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                inventoryArray = controller.getInventory(); // get current users inventory from DB as an array
-                inventoryTableModel.setRowCount(0); // clear inventory table
-
-                // loop through currentUser inventory array
-                for (Inventory item : inventoryArray) {
-                    Object[] rowData = new Object[]{
-                        item.getProductName(),
-                        item.getProductBrand(),
-                        item.getProductPrice(),
-                        item.getProductType(),
-                        item.getProductQuantity()
-                    };
-                    inventoryTableModel.addRow(rowData);
-                }
-
-                inventoryTable = new JTable(inventoryTableModel);
-                displayTable(inventoryTable);
-
-                addOrderButtonToPanel(); // allows user to create an order
-                createOrderButton.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        // Dispose the current frame
-                        frame.dispose();
-                        // Create a new CreateOrderGUI window
-                        CreateOrderGUI createOrderGUI = new CreateOrderGUI(controller);
-                    }
-                });
-            }
-        });
-
-        // Box 2: Add a product button
-        addProductButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                displayUpdateInventory(1);
-
-                // confirmButton method for adding product
-                updateAddButton.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        // get values from text fields
-                        String productID = productIDTextField.getText();
-                        String quantityText = quantityTextField.getText();
-                        int quantity = Integer.parseInt(quantityText);
-
-                        controller.addProduct(productID, quantity); // add product to DB
-                        resetTextFields();
-                    }
-                });
-            }
-        });
-        
-        // Box 3: Remove a product button
-        removeProductButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                displayUpdateInventory(2);
-
-                // confirmButton method for removing product
-                updateRemoveButton.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        // get values from text fields
-                        String productID = productIDTextField.getText();
-                        controller.removeProduct(productID); // remove product from DB
-                        resetTextFields();
-                    }
-                });
-            }
-        });
-
-        // Box 4: Update quantity of a product button
-        updateQuantityButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                displayUpdateInventory(3);
-
-                // confirmButton method for adding product
-                changeQuantityButton.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        // get values from text fields
-                        String productID = productIDTextField.getText();
-                        String quantityText = quantityTextField.getText();
-                        int quantity = Integer.parseInt(quantityText);
-
-                        controller.updateProductQuantity(productID, quantity); // update quantity of a product
-                        resetTextFields();
-                    }
-                });
-            }
-        });
-
-        // Box 5: viewCarProducts Button
-        viewCarProductsButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                databaseManager = new DatabaseManager();
-
-                String sql = "SELECT * FROM CARPRODUCTCATALOGUE"; // SQL query to select all rows from the table
-                ResultSet resultSet = databaseManager.queryDB(sql); // Execute the query and get the result set
-
-                // Create a table model to hold the data from the result set
-                DefaultTableModel tableModel = new DefaultTableModel();
-                try {
-                    // Get the column names from the result set metadata
-                    ResultSetMetaData metaData = resultSet.getMetaData();
-                    int columnCount = metaData.getColumnCount();
-                    for (int i = 1; i <= columnCount; i++) {
-                        tableModel.addColumn(metaData.getColumnLabel(i));
-                    }
-
-                    // Add the rows to the table model
-                    while (resultSet.next()) {
-                        Object[] rowData = new Object[columnCount];
-                        for (int i = 1; i <= columnCount; i++) {
-                            rowData[i - 1] = resultSet.getObject(i);
-                        }
-                        tableModel.addRow(rowData);
-                    }
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                }
-
-                JTable carCatalogueTable = new JTable(tableModel); // Create a table using the table model
-                //customizeTable(carCatalogueTable);
-                displayTable(carCatalogueTable); // Display the table in full screen
-            }
-        });
-
-        // Box 6: Exit Program
-        exitButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                System.exit(0); // Exit the program with a status code of 0
-            }
-        });
-    }
-
-    private void addOrderButtonToPanel() {
+    private void displayOrderButton() {
+        // When user opens the view inventory button then the add order button will appear
         JPanel buttonPanel = new JPanel();
         buttonPanel.setBackground(Color.WHITE);
         buttonPanel.setLayout(new BorderLayout());
@@ -426,7 +529,7 @@ public class MainMenuGUI {
     }
 
     public void displayFrame() {
-        // Panel to display contents
+        // Frame to display contents
         contentPanel = new JPanel();
         contentPanel.setBackground(Color.WHITE);
         contentPanel.setLayout(new BorderLayout());
@@ -439,10 +542,5 @@ public class MainMenuGUI {
 
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
-    }
-
-    public void resetTextFields() {
-        productIDTextField.setText("");
-        quantityTextField.setText("");
     }
 }

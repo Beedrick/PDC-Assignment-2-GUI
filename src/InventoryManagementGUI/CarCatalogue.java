@@ -4,21 +4,18 @@ package InventoryManagementGUI;
  *
  * @author rocco + beedrix
  */
-
-public class Inventory {
+public class CarCatalogue {
 
     private String productName;
     private String productBrand;
     private double productPrice;
     private String productType;
-    private int productQuantity;
 
-    public Inventory(String productName, String productBrand, double productPrice, String productType, int productQuantity) {
+    public CarCatalogue(String productName, String productBrand, double productPrice, String productType) {
         this.productName = productName;
         this.productBrand = productBrand;
         this.productPrice = productPrice;
         this.productType = productType;
-        this.productQuantity = productQuantity;
     }
 
     public String getProductName() {
@@ -35,9 +32,5 @@ public class Inventory {
 
     public String getProductType() {
         return productType;
-    }
-
-    public int getProductQuantity() {
-        return productQuantity;
     }
 }
